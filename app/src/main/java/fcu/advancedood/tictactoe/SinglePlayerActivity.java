@@ -10,7 +10,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
-public class GameActivity extends Activity {
+public class SinglePlayerActivity extends Activity {
 
   /** Global Variable Declaration **/
   private ImageButton[] GameButton;
@@ -22,7 +22,7 @@ public class GameActivity extends Activity {
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    setContentView(R.layout.activity_game);
+    setContentView(R.layout.activity_single_player);
     Init();
   }
 
