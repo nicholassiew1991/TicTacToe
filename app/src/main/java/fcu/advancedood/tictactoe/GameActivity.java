@@ -2,7 +2,6 @@ package fcu.advancedood.tictactoe;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -15,7 +14,6 @@ public class GameActivity extends Activity {
 
   /** Global Variable Declaration **/
   private ImageButton[] GameButton;
-  private char cPlayerSymbol;
   private char cWinner = ' ';
   private char cCurrentTurn = 'O'; // Default is O
   private char[] GamePlayStatus = {'?', '?', '?', '?', '?', '?', '?', '?', '?'};
