@@ -1,9 +1,14 @@
 package fcu.advancedood.tictactoe;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Toast;
 
 
 public class StartMenuActivity extends Activity {
@@ -12,7 +17,7 @@ public class StartMenuActivity extends Activity {
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    setContentView(R.layout.activity_start_menu);
+    setContentView(R.layout.activity_simple_start_menu);
   }
 
   @Override
@@ -38,5 +43,23 @@ public class StartMenuActivity extends Activity {
   }
   //</editor-fold>
 
+  public void cmdStartSinglePlayer(View v) {
+    Intent addCardActivity = new Intent();
+    addCardActivity.setClass(StartMenuActivity.this, NewSinglePlayerActivity.class);
+    startActivity(addCardActivity);
+  }
 
+  public void cmdStartMultiPlayer(View v) {
+    AlertDialog alertDialogBuilder = new AlertDialog.Builder(StartMenuActivity.this).create();
+    alertDialogBuilder.setTitle("Game in under construction");
+    alertDialogBuilder.setMessage("Please wait patiently.");
+
+    alertDialogBuilder.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+            new DialogInterface.OnClickListener() {
+              public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+              }
+            });
+    alertDialogBuilder.show();
+  }
 }

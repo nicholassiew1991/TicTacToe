@@ -1,9 +1,6 @@
 package fcu.advancedood.tictactoe;
 
 
-import android.content.Context;
-import android.widget.Toast;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -81,19 +78,15 @@ class Board {
     return CheckIsWin('O');
   }
 
-  public boolean isGameOver() {
-    return (getAvailableStates().isEmpty() || isXWon() || isOWon());
-  }
-
   public boolean isPointAvailable(Point p) {
     return (BoardStatus[p.x][p.y] == '?' ? true : false);
   }
 
-  public void PlayerMove(Point point, char player) {
+  public void SetPlayerMove(Point point, char player) {
     BoardStatus[point.x][point.y] = player;
   }
 
-  public Point returnBestMove() {
+  public Point ReturnBestMove() {
     int MAX = -100000;
     int best = -1;
 
@@ -106,7 +99,12 @@ class Board {
     return rootsChildrenScores.get(best).point;
   }
 
-  public int returnMin(List<Integer> list) {
+  public void CallMinimax(int depth, char PlayerTurn) {
+    rootsChildrenScores = new ArrayList<>();
+    Minimax(depth, PlayerTurn);
+  }
+
+  private int returnMin(List<Integer> list) {
     int min = Integer.MAX_VALUE;
     int index = -1;
     for (int i = 0; i < list.size(); ++i) {
@@ -118,7 +116,7 @@ class Board {
     return list.get(index);
   }
 
-  public int returnMax(List<Integer> list) {
+  private int returnMax(List<Integer> list) {
     int max = Integer.MIN_VALUE;
     int index = -1;
     for (int i = 0; i < list.size(); ++i) {
@@ -130,13 +128,7 @@ class Board {
     return list.get(index);
   }
 
-  int debug;
-  public void callMinimax(int depth, char PlayerTurn) {
-    rootsChildrenScores = new ArrayList<>();
-    debug = minimax(depth, PlayerTurn);
-  }
-
-  public int minimax(int depth, char PlayerTurn) {
+  private int Minimax(int depth, char PlayerTurn) {
 
     if (isXWon()) {
       return +1;
@@ -155,18 +147,18 @@ class Board {
     for (int i = 0; i < pointsAvailable.size(); ++i) {
       Point point = pointsAvailable.get(i);
 
-      if (PlayerTurn == 'X') { //X's turn select the highest from below minimax() call
-        PlayerMove(point, 'X');
-        int currentScore = minimax(depth + 1, 'O');
+      if (PlayerTurn == 'X') { //X's turn select the highest from below Minimax() call
+        SetPlayerMove(point, 'X');
+        int currentScore = Minimax(depth + 1, 'O');
         scores.add(currentScore);
 
         if (depth == 0)
           rootsChildrenScores.add(new PointsAndScores(currentScore, point));
 
       }
-      else if (PlayerTurn == 'O') {//O's turn select the lowest from below minimax() call
-        PlayerMove(point, 'O');
-        scores.add(minimax(depth + 1, 'X'));
+      else if (PlayerTurn == 'O') {//O's turn select the lowest from below Minimax() call
+        SetPlayerMove(point, 'O');
+        scores.add(Minimax(depth + 1, 'X'));
       }
       BoardStatus[point.x][point.y] = '?'; //Reset this point
     }

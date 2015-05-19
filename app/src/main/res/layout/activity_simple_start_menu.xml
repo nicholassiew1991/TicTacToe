@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="16dp">
+
+  <LinearLayout
+      android:orientation="vertical"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:layout_centerHorizontal="true"
+      android:layout_alignParentTop="true"
+      android:paddingTop="20dp">
+
+    <ImageView
+        android:layout_width="270dp"
+        android:layout_height="270dp"
+        android:id="@+id/imageView3"
+        android:layout_gravity="center_horizontal"
+        android:background="@drawable/bg2"
+        />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="Tic-Tac-Toe"
+        android:id="@+id/lblTitle"
+        android:layout_gravity="center_horizontal"
+        android:textSize="35dp"
+        android:layout_marginBottom="15dp"
+        android:layout_marginTop="0dp"/>
+
+    <Button
+        android:layout_width="160dp"
+        android:layout_height="wrap_content"
+        android:text="Single Player"
+        android:id="@+id/cmdSingle"
+        android:layout_gravity="center_horizontal"
+        android:textSize="18dp"
+        android:onClick="cmdStartSinglePlayer"/>
+
+    <Button
+        android:layout_width="160dp"
+        android:layout_height="wrap_content"
+        android:text="Multi Player"
+        android:id="@+id/cmdMulti"
+        android:layout_gravity="center_horizontal"
+        android:textSize="18dp"
+        android:nestedScrollingEnabled="false"
+        android:onClick="cmdStartMultiPlayer"/>
+
+  </LinearLayout>
+</RelativeLayout>

@@ -1,9 +1,9 @@
 package fcu.advancedood.tictactoe;
 
 import android.app.Activity;
-import android.content.Context;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -139,6 +139,36 @@ public class NewSinglePlayerActivity extends Activity {
 
   }
 
+  private void DisableButtons() {
+    for (int a = 0; a < 3; a++) {
+      GameButton[a][0].setEnabled(false);
+      GameButton[a][1].setEnabled(false);
+      GameButton[a][2].setEnabled(false);
+    }
+  }
+
+  @Override
+  public void onBackPressed() {
+    AlertDialog.Builder alertDialog = new AlertDialog.Builder(NewSinglePlayerActivity.this);
+    alertDialog.setTitle("Exit");
+    alertDialog.setMessage("Game is in the progress.\nAre you sure want to exit?");
+
+    alertDialog.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+      public void onClick(DialogInterface dialog, int which) {
+        //moveTaskToBack(true);
+        //finishActivity();
+        finish();
+      }
+    });
+    alertDialog.setNegativeButton("No", new DialogInterface.OnClickListener() {
+      public void onClick(DialogInterface dialog, int which) {
+        dialog.dismiss();
+      }
+    });
+
+    alertDialog.show();
+  }
+
   public void onGameButtonsClick(View v, int x, int y, char Player) {
 
     Point MovePoint = new Point(x, y);
@@ -148,34 +178,38 @@ public class NewSinglePlayerActivity extends Activity {
       return;
     }
 
-    GameBoard.PlayerMove(MovePoint, Player);
+    GameBoard.SetPlayerMove(MovePoint, Player);
     UpdateBoard(MovePoint, Player);
 
     if (GameBoard.isOWon()) {
       Toast.makeText(this, "You win.", Toast.LENGTH_SHORT).show();
       ((TextView) findViewById(R.id.lblStatus)).setText("Winner: O");
+      DisableButtons();
       return;
     }
     else if (GameBoard.getAvailableStates().isEmpty()) {
       Toast.makeText(this, "Draw.", Toast.LENGTH_SHORT).show();
       ((TextView) findViewById(R.id.lblStatus)).setText("Draw");
+      DisableButtons();
       return;
     }
 
     // Computer Move
-    GameBoard.callMinimax(0, 'X');
-    MovePoint = GameBoard.returnBestMove();
-    GameBoard.PlayerMove(MovePoint, 'X');
+    GameBoard.CallMinimax(0, 'X');
+    MovePoint = GameBoard.ReturnBestMove();
+    GameBoard.SetPlayerMove(MovePoint, 'X');
     UpdateBoard(MovePoint, 'X');
 
     if (GameBoard.isXWon()) {
       Toast.makeText(this, "Computer win.", Toast.LENGTH_SHORT).show();
       ((TextView) findViewById(R.id.lblStatus)).setText("Winner: X");
+      DisableButtons();
       return;
     }
     else if (GameBoard.getAvailableStates().isEmpty()) {
       Toast.makeText(this, "Draw.", Toast.LENGTH_SHORT).show();
       ((TextView) findViewById(R.id.lblStatus)).setText("Draw");
+      DisableButtons();
       return;
     }
   }

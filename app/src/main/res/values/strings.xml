@@ -4,6 +4,6 @@
   <string name="hello_world">Hello world!</string>
   <string name="action_settings">Settings</string>
 
-  <string name="GameTitle">TicTacToe</string>
+  <string name="GameTitle">Tic-Tac-Toe</string>
   <string name="title_activity_start_menu">StartMenuActivity</string>
 </resources>
