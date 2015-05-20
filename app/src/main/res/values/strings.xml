@@ -6,4 +6,5 @@
 
   <string name="GameTitle">Tic-Tac-Toe</string>
   <string name="title_activity_start_menu">StartMenuActivity</string>
+  <string name="title_activity_multi_player">MultiPlayerActivity</string>
 </resources>

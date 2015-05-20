@@ -11,9 +11,6 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
-/**
- * Created by Nicholas on 18/5/2015.
- */
 public class NewSinglePlayerActivity extends Activity {
 
   private ImageButton[][] GameButton;
@@ -70,6 +67,7 @@ public class NewSinglePlayerActivity extends Activity {
     };
 
     ActionInit();
+    UpdateStatusTextView("It's your turn");
   }
 
   private void ActionInit() {
@@ -129,6 +127,10 @@ public class NewSinglePlayerActivity extends Activity {
     });
   }
 
+  private void UpdateStatusTextView(String message) {
+    ((TextView) findViewById(R.id.lblStatus)).setText(message);
+  }
+
   private void UpdateBoard(Point p, char Player) {
     if (Player == 'O') {
       GameButton[p.x][p.y].setImageResource(R.drawable.o);
@@ -136,7 +138,6 @@ public class NewSinglePlayerActivity extends Activity {
     else if (Player == 'X'){
       GameButton[p.x][p.y].setImageResource(R.drawable.x);
     }
-
   }
 
   private void DisableButtons() {
@@ -149,14 +150,18 @@ public class NewSinglePlayerActivity extends Activity {
 
   @Override
   public void onBackPressed() {
+
+    if (GameBoard.IsGameOver()) {
+      finish();
+      return;
+    }
+
     AlertDialog.Builder alertDialog = new AlertDialog.Builder(NewSinglePlayerActivity.this);
     alertDialog.setTitle("Exit");
     alertDialog.setMessage("Game is in the progress.\nAre you sure want to exit?");
 
     alertDialog.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
       public void onClick(DialogInterface dialog, int which) {
-        //moveTaskToBack(true);
-        //finishActivity();
         finish();
       }
     });
@@ -183,18 +188,19 @@ public class NewSinglePlayerActivity extends Activity {
 
     if (GameBoard.isOWon()) {
       Toast.makeText(this, "You win.", Toast.LENGTH_SHORT).show();
-      ((TextView) findViewById(R.id.lblStatus)).setText("Winner: O");
+      UpdateStatusTextView("Winner: O");
       DisableButtons();
       return;
     }
     else if (GameBoard.getAvailableStates().isEmpty()) {
       Toast.makeText(this, "Draw.", Toast.LENGTH_SHORT).show();
-      ((TextView) findViewById(R.id.lblStatus)).setText("Draw");
+      UpdateStatusTextView("Draw");
       DisableButtons();
       return;
     }
 
     // Computer Move
+    UpdateStatusTextView("It's computer turn");
     GameBoard.CallMinimax(0, 'X');
     MovePoint = GameBoard.ReturnBestMove();
     GameBoard.SetPlayerMove(MovePoint, 'X');
@@ -202,15 +208,17 @@ public class NewSinglePlayerActivity extends Activity {
 
     if (GameBoard.isXWon()) {
       Toast.makeText(this, "Computer win.", Toast.LENGTH_SHORT).show();
-      ((TextView) findViewById(R.id.lblStatus)).setText("Winner: X");
+      UpdateStatusTextView("Winner: X");
       DisableButtons();
       return;
     }
     else if (GameBoard.getAvailableStates().isEmpty()) {
       Toast.makeText(this, "Draw.", Toast.LENGTH_SHORT).show();
-      ((TextView) findViewById(R.id.lblStatus)).setText("Draw");
+      UpdateStatusTextView("Draw");
       DisableButtons();
       return;
     }
+
+    UpdateStatusTextView("It's your turn");
   }
 }

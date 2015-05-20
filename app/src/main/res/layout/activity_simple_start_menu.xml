@@ -10,7 +10,8 @@
       android:layout_height="match_parent"
       android:layout_centerHorizontal="true"
       android:layout_alignParentTop="true"
-      android:paddingTop="20dp">
+      android:paddingTop="20dp"
+      android:weightSum="1">
 
     <ImageView
         android:layout_width="270dp"
@@ -38,7 +39,8 @@
         android:id="@+id/cmdSingle"
         android:layout_gravity="center_horizontal"
         android:textSize="18dp"
-        android:onClick="cmdStartSinglePlayer"/>
+        android:onClick="cmdStartSinglePlayer"
+        android:layout_weight="0.15"/>
 
     <Button
         android:layout_width="160dp"
@@ -48,7 +50,8 @@
         android:layout_gravity="center_horizontal"
         android:textSize="18dp"
         android:nestedScrollingEnabled="false"
-        android:onClick="cmdStartMultiPlayer"/>
+        android:onClick="cmdStartMultiPlayer"
+        android:layout_weight="0.15"/>
 
   </LinearLayout>
 </RelativeLayout>

@@ -1,6 +1,5 @@
 package fcu.advancedood.tictactoe;
 
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,7 +27,7 @@ class PointsAndScores {
 class Board {
 
   List<PointsAndScores> rootsChildrenScores;
-  List<Point> availablePoints;;
+  List<Point> availablePoints;
 
   char[][] BoardStatus = new char[][] {
     {'?', '?', '?'},
@@ -76,6 +75,10 @@ class Board {
 
   public boolean isOWon() {
     return CheckIsWin('O');
+  }
+
+  public boolean IsGameOver() {
+    return (getAvailableStates().isEmpty() || isXWon() || isOWon());
   }
 
   public boolean isPointAvailable(Point p) {
