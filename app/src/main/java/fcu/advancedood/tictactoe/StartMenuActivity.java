@@ -10,6 +10,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import java.io.IOException;
+import java.net.Socket;
+import java.net.UnknownHostException;
+
 
 public class StartMenuActivity extends Activity {
 
@@ -44,22 +48,33 @@ public class StartMenuActivity extends Activity {
   //</editor-fold>
 
   public void cmdStartSinglePlayer(View v) {
-    Intent addCardActivity = new Intent();
-    addCardActivity.setClass(StartMenuActivity.this, NewSinglePlayerActivity.class);
-    startActivity(addCardActivity);
+    Intent SinglePlayerActivity = new Intent();
+    SinglePlayerActivity.setClass(StartMenuActivity.this, NewSinglePlayerActivity.class);
+    startActivity(SinglePlayerActivity);
   }
 
   public void cmdStartMultiPlayer(View v) {
+
     AlertDialog alertDialogBuilder = new AlertDialog.Builder(StartMenuActivity.this).create();
     alertDialogBuilder.setTitle("Game in under construction");
     alertDialogBuilder.setMessage("Please wait patiently.");
 
-    alertDialogBuilder.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
-            new DialogInterface.OnClickListener() {
-              public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-              }
-            });
+    alertDialogBuilder.setButton(AlertDialog.BUTTON_NEUTRAL, "OK", new DialogInterface.OnClickListener() {
+      public void onClick(DialogInterface dialog, int which) { dialog.dismiss(); }
+    });
     alertDialogBuilder.show();
+
+    /*Intent MultiPlayerActivity = new Intent();
+    MultiPlayerActivity.setClass(StartMenuActivity.this, MultiPlayerActivity.class);
+    startActivity(MultiPlayerActivity);*/
+
+    try {
+      Socket a = new Socket("10.0.2.2", 6666);
+      a.close();
+    }
+    catch (IOException ex) {
+      //Logger.getLogger(ClientTest.class.getName()).log(Level.SEVERE, null, ex);
+    }
   }
 }
+
