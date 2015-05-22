@@ -3,9 +3,11 @@ package fcu.advancedood.tictactoe;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -14,17 +16,20 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.IOException;
+import java.net.ConnectException;
+import java.net.NoRouteToHostException;
 import java.net.Socket;
 
 public class MultiPlayerActivity extends Activity {
 
-  private final String SERVER_IP = "10.0.2.2";
-  private final int SERVER_PORT = 6666;
+  private final String SERVER_IP = "192.168.191.1";
+  private final String SERVER_PORT = "6666";
 
   private ImageButton[][] GameButton;
   Board GameBoard = new Board();
 
-  Context context;
+  Context ThisContext = this;
+  Socket Connection;
 
   //<editor-fold desc="Don't touch">
   @Override
@@ -58,7 +63,7 @@ public class MultiPlayerActivity extends Activity {
   //</editor-fold>
 
   public void Init() {
-    context = this;
+    //ThisContext = this;
     GameButton = new ImageButton[][]{
       {
         (ImageButton) findViewById(R.id.imageButton1),
@@ -79,27 +84,40 @@ public class MultiPlayerActivity extends Activity {
 
     ActionInit();
 
-    AsyncTask<String, Void, String> task = new AsyncTask<String, Void, String>() {
+    new AsyncTask<String, Void, String>() {
 
-      ProgressDialog pd;
+      ProgressDialog ConnectServerLoadingDialog;
+      Intent ReturnData = new Intent();
 
       @Override
       protected void onPreExecute() {
-        pd = new ProgressDialog(context);
-        pd.setTitle("Connecting to server");
-        pd.setMessage("Please wait...");
-        pd.setCancelable(true);
-        pd.setIndeterminate(true);
-        pd.show();
+        ConnectServerLoadingDialog = new ProgressDialog(ThisContext);
+        ConnectServerLoadingDialog.setTitle("Connecting to server");
+        ConnectServerLoadingDialog.setMessage("Please wait...");
+        ConnectServerLoadingDialog.setCancelable(true);
+        ConnectServerLoadingDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+          @Override
+          public void onCancel(DialogInterface dialog) {
+            ReturnData.setData(Uri.parse("Connection cancelled."));
+            setResult(RESULT_OK, ReturnData);
+            finish();
+          }
+        });
+        ConnectServerLoadingDialog.setIndeterminate(true);
+        ConnectServerLoadingDialog.show();
       }
 
       @Override
       protected String doInBackground(String... AddressPort) {
 
         try {
-          Socket Connection = new Socket(AddressPort[0], Integer.parseInt(AddressPort[1]));
-          Connection.close();
+          Connection = new Socket(AddressPort[0], Integer.parseInt(AddressPort[1]));
           Thread.sleep(5000);
+        }
+        catch (ConnectException e) {
+          ReturnData.setData(Uri.parse("Error. Can't connect to the server."));
+          setResult(RESULT_OK, ReturnData);
+          finish();
         }
         catch (IOException e) {
           e.printStackTrace();
@@ -112,12 +130,11 @@ public class MultiPlayerActivity extends Activity {
 
       @Override
       protected void onPostExecute(String result) {
-        pd.dismiss();
+        ConnectServerLoadingDialog.dismiss();
         ((TextView) findViewById(R.id.lblStatus)).setText(result);
       }
 
-    };
-    task.execute(SERVER_IP, SERVER_PORT + "");
+    }.execute(SERVER_IP, SERVER_PORT);
   }
 
   private void ActionInit() {

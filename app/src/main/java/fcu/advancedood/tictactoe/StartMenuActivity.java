@@ -17,6 +17,8 @@ import java.net.UnknownHostException;
 
 public class StartMenuActivity extends Activity {
 
+  private final int CONNECT_SERVER = 1;
+
   //<editor-fold desc="Don't Touch!" defaultstate="collapsed">
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +49,15 @@ public class StartMenuActivity extends Activity {
   }
   //</editor-fold>
 
+  @Override
+  protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    if (requestCode == CONNECT_SERVER) {
+      if (resultCode == RESULT_OK) {
+        Toast.makeText(this, data.getData().toString(), Toast.LENGTH_SHORT).show();
+      }
+    }
+  }
+
   public void cmdStartSinglePlayer(View v) {
     Intent SinglePlayerActivity = new Intent();
     SinglePlayerActivity.setClass(StartMenuActivity.this, NewSinglePlayerActivity.class);
@@ -63,7 +74,7 @@ public class StartMenuActivity extends Activity {
       public void onClick(DialogInterface dialog, int which) {
         Intent MultiPlayerActivity = new Intent();
         MultiPlayerActivity.setClass(StartMenuActivity.this, MultiPlayerActivity.class);
-        startActivity(MultiPlayerActivity);
+        startActivityForResult(MultiPlayerActivity, CONNECT_SERVER);
         dialog.dismiss();
       }
     });
