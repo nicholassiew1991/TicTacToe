@@ -60,21 +60,14 @@ public class StartMenuActivity extends Activity {
     alertDialogBuilder.setMessage("Please wait patiently.");
 
     alertDialogBuilder.setButton(AlertDialog.BUTTON_NEUTRAL, "OK", new DialogInterface.OnClickListener() {
-      public void onClick(DialogInterface dialog, int which) { dialog.dismiss(); }
+      public void onClick(DialogInterface dialog, int which) {
+        Intent MultiPlayerActivity = new Intent();
+        MultiPlayerActivity.setClass(StartMenuActivity.this, MultiPlayerActivity.class);
+        startActivity(MultiPlayerActivity);
+        dialog.dismiss();
+      }
     });
     alertDialogBuilder.show();
-
-    /*Intent MultiPlayerActivity = new Intent();
-    MultiPlayerActivity.setClass(StartMenuActivity.this, MultiPlayerActivity.class);
-    startActivity(MultiPlayerActivity);*/
-
-    try {
-      Socket a = new Socket("10.0.2.2", 6666);
-      a.close();
-    }
-    catch (IOException ex) {
-      //Logger.getLogger(ClientTest.class.getName()).log(Level.SEVERE, null, ex);
-    }
   }
 }
 
