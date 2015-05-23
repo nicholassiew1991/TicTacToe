@@ -131,23 +131,6 @@ public class NewSinglePlayerActivity extends Activity {
     ((TextView) findViewById(R.id.lblStatus)).setText(message);
   }
 
-  private void UpdateBoard(Point p, char Player) {
-    if (Player == 'O') {
-      GameButton[p.x][p.y].setImageResource(R.drawable.o);
-    }
-    else if (Player == 'X'){
-      GameButton[p.x][p.y].setImageResource(R.drawable.x);
-    }
-  }
-
-  private void DisableButtons() {
-    for (int a = 0; a < 3; a++) {
-      GameButton[a][0].setEnabled(false);
-      GameButton[a][1].setEnabled(false);
-      GameButton[a][2].setEnabled(false);
-    }
-  }
-
   @Override
   public void onBackPressed() {
 
@@ -184,18 +167,18 @@ public class NewSinglePlayerActivity extends Activity {
     }
 
     GameBoard.SetPlayerMove(MovePoint, Player);
-    UpdateBoard(MovePoint, Player);
+    GameBoard.UpdateBoard(GameButton, MovePoint, Player);
 
     if (GameBoard.isOWon()) {
       Toast.makeText(this, "You win.", Toast.LENGTH_SHORT).show();
       UpdateStatusTextView("Winner: O");
-      DisableButtons();
+      GameBoard.DisableBoardButtons(GameButton);
       return;
     }
     else if (GameBoard.getAvailableStates().isEmpty()) {
       Toast.makeText(this, "Draw.", Toast.LENGTH_SHORT).show();
       UpdateStatusTextView("Draw");
-      DisableButtons();
+      GameBoard.DisableBoardButtons(GameButton);
       return;
     }
 
@@ -204,18 +187,18 @@ public class NewSinglePlayerActivity extends Activity {
     GameBoard.CallMinimax(0, 'X');
     MovePoint = GameBoard.ReturnBestMove();
     GameBoard.SetPlayerMove(MovePoint, 'X');
-    UpdateBoard(MovePoint, 'X');
+    GameBoard.UpdateBoard(GameButton, MovePoint, 'X');
 
     if (GameBoard.isXWon()) {
       Toast.makeText(this, "Computer win.", Toast.LENGTH_SHORT).show();
       UpdateStatusTextView("Winner: X");
-      DisableButtons();
+      GameBoard.DisableBoardButtons(GameButton);
       return;
     }
     else if (GameBoard.getAvailableStates().isEmpty()) {
       Toast.makeText(this, "Draw.", Toast.LENGTH_SHORT).show();
       UpdateStatusTextView("Draw");
-      DisableButtons();
+      GameBoard.DisableBoardButtons(GameButton);
       return;
     }
 

@@ -1,5 +1,7 @@
 package fcu.advancedood.tictactoe;
 
+import android.widget.ImageButton;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,11 +31,31 @@ class Board {
   List<PointsAndScores> rootsChildrenScores;
   List<Point> availablePoints;
 
-  char[][] BoardStatus = new char[][] {
+  private char[][] BoardStatus = new char[][] {
     {'?', '?', '?'},
     {'?', '?', '?'},
     {'?', '?', '?'}
   };
+
+  public void UpdateBoard(ImageButton[][] GameButton, Point p, char Player) {
+    if (Player == 'O') {
+      GameButton[p.x][p.y].setImageResource(R.drawable.o);
+    } else if (Player == 'X') {
+      GameButton[p.x][p.y].setImageResource(R.drawable.x);
+    }
+  }
+
+  public void DisableBoardButtons(ImageButton[][] GameButton) {
+    for (int a = 0; a < 3; a++) {
+      GameButton[a][0].setEnabled(false);
+      GameButton[a][1].setEnabled(false);
+      GameButton[a][2].setEnabled(false);
+    }
+  }
+
+  public char[][] GetBoardStatus() {
+    return BoardStatus;
+  }
 
   private boolean CheckIsWin(char Player) {
 

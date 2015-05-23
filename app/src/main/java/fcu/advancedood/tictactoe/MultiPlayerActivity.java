@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -15,7 +16,13 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.BufferedWriter;
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.net.ConnectException;
 import java.net.NoRouteToHostException;
 import java.net.Socket;
@@ -63,7 +70,8 @@ public class MultiPlayerActivity extends Activity {
   //</editor-fold>
 
   public void Init() {
-    //ThisContext = this;
+    ConnectServer(); // Caution!! The code below will execute when it execute AsyncTask
+    //<editor-fold desc="Init">
     GameButton = new ImageButton[][]{
       {
         (ImageButton) findViewById(R.id.imageButton1),
@@ -83,58 +91,7 @@ public class MultiPlayerActivity extends Activity {
     };
 
     ActionInit();
-
-    new AsyncTask<String, Void, String>() {
-
-      ProgressDialog ConnectServerLoadingDialog;
-      Intent ReturnData = new Intent();
-
-      @Override
-      protected void onPreExecute() {
-        ConnectServerLoadingDialog = new ProgressDialog(ThisContext);
-        ConnectServerLoadingDialog.setTitle("Connecting to server");
-        ConnectServerLoadingDialog.setMessage("Please wait...");
-        ConnectServerLoadingDialog.setCancelable(true);
-        ConnectServerLoadingDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
-          @Override
-          public void onCancel(DialogInterface dialog) {
-            ReturnData.setData(Uri.parse("Connection cancelled."));
-            setResult(RESULT_OK, ReturnData);
-            finish();
-          }
-        });
-        ConnectServerLoadingDialog.setIndeterminate(true);
-        ConnectServerLoadingDialog.show();
-      }
-
-      @Override
-      protected String doInBackground(String... AddressPort) {
-
-        try {
-          Connection = new Socket(AddressPort[0], Integer.parseInt(AddressPort[1]));
-          Thread.sleep(5000);
-        }
-        catch (ConnectException e) {
-          ReturnData.setData(Uri.parse("Error. Can't connect to the server."));
-          setResult(RESULT_OK, ReturnData);
-          finish();
-        }
-        catch (IOException e) {
-          e.printStackTrace();
-        }
-        catch (InterruptedException e) {
-          e.printStackTrace();
-        }
-        return "Connected";
-      }
-
-      @Override
-      protected void onPostExecute(String result) {
-        ConnectServerLoadingDialog.dismiss();
-        ((TextView) findViewById(R.id.lblStatus)).setText(result);
-      }
-
-    }.execute(SERVER_IP, SERVER_PORT);
+    //</editor-fold>
   }
 
   private void ActionInit() {
@@ -196,12 +153,68 @@ public class MultiPlayerActivity extends Activity {
     */
   }
 
-  private void UpdateBoard(Point p, char Player) {
-    if (Player == 'O') {
-      GameButton[p.x][p.y].setImageResource(R.drawable.o);
-    } else if (Player == 'X') {
-      GameButton[p.x][p.y].setImageResource(R.drawable.x);
+  private void SendGameStatus() {
+    try {
+      OutputStream outToServer = Connection.getOutputStream();
+      ObjectOutputStream out = new ObjectOutputStream(outToServer);
+      out.writeObject(GameBoard.GetBoardStatus());
+    } catch (IOException e) {
+      e.printStackTrace();
     }
+  }
+
+  private void ReceiveGameStatus() {
+
+  }
+
+  private void ConnectServer() {
+    new AsyncTask<String, Void, Void>() {
+
+      ProgressDialog ConnectServerLoadingDialog;
+      Intent ReturnData = new Intent();
+
+      @Override
+      protected void onPreExecute() {
+        ConnectServerLoadingDialog = new ProgressDialog(ThisContext);
+        ConnectServerLoadingDialog.setTitle("Connecting to server");
+        ConnectServerLoadingDialog.setMessage("Please wait...");
+        ConnectServerLoadingDialog.setCancelable(true);
+        ConnectServerLoadingDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+          @Override
+          public void onCancel(DialogInterface dialog) {
+            ReturnData.setData(Uri.parse("Connection cancelled."));
+            setResult(RESULT_OK, ReturnData);
+            finish();
+          }
+        });
+        ConnectServerLoadingDialog.setIndeterminate(true);
+        ConnectServerLoadingDialog.show();
+      }
+
+      @Override
+      protected Void doInBackground(String... Params) {
+
+        try {
+          Connection = new Socket(Params[0], Integer.parseInt(Params[1]));
+        } catch (ConnectException e) {
+          ReturnData.setData(Uri.parse("Error. Can't connect to the server."));
+          setResult(RESULT_OK, ReturnData);
+          finish();
+        } catch (IOException e) {
+          e.printStackTrace();
+          ReturnData.setData(Uri.parse("Unknown error."));
+          setResult(RESULT_OK, ReturnData);
+          finish();
+        }
+        return null;
+      }
+
+      @Override
+      protected void onPostExecute(Void result) {
+        ConnectServerLoadingDialog.dismiss();
+      }
+
+    }.execute(SERVER_IP, SERVER_PORT);
   }
 
   private void DisableButtons() {
@@ -226,14 +239,15 @@ public class MultiPlayerActivity extends Activity {
     }
 
     GameBoard.SetPlayerMove(MovePoint, Player);
-    UpdateBoard(MovePoint, Player);
+    GameBoard.UpdateBoard(GameButton, MovePoint, Player);
 
     if (GameBoard.isOWon()) {
       Toast.makeText(this, "You win.", Toast.LENGTH_SHORT).show();
       UpdateStatusTextView("Winner: O");
       DisableButtons();
       return;
-    } else if (GameBoard.getAvailableStates().isEmpty()) {
+    }
+    else if (GameBoard.getAvailableStates().isEmpty()) {
       Toast.makeText(this, "Draw.", Toast.LENGTH_SHORT).show();
       UpdateStatusTextView("Draw");
       DisableButtons();
@@ -245,14 +259,15 @@ public class MultiPlayerActivity extends Activity {
     GameBoard.CallMinimax(0, 'X');
     MovePoint = GameBoard.ReturnBestMove();
     GameBoard.SetPlayerMove(MovePoint, 'X');
-    UpdateBoard(MovePoint, 'X');
+    GameBoard.UpdateBoard(GameButton, MovePoint, 'X');
 
     if (GameBoard.isXWon()) {
       Toast.makeText(this, "Computer win.", Toast.LENGTH_SHORT).show();
       UpdateStatusTextView("Winner: X");
       DisableButtons();
       return;
-    } else if (GameBoard.getAvailableStates().isEmpty()) {
+    }
+    else if (GameBoard.getAvailableStates().isEmpty()) {
       Toast.makeText(this, "Draw.", Toast.LENGTH_SHORT).show();
       UpdateStatusTextView("Draw");
       DisableButtons();
