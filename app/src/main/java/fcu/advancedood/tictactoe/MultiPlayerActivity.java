@@ -1,6 +1,7 @@
 package fcu.advancedood.tictactoe;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -29,7 +30,8 @@ import java.net.Socket;
 
 public class MultiPlayerActivity extends Activity {
 
-  private final String SERVER_IP = "192.168.191.1";
+  //private final String SERVER_IP = "192.168.191.1";
+  private final String SERVER_IP = "10.0.2.2";
   private final String SERVER_PORT = "6666";
 
   private ImageButton[][] GameButton;
@@ -37,6 +39,8 @@ public class MultiPlayerActivity extends Activity {
 
   Context ThisContext = this;
   Socket Connection;
+
+  char PlayerSymbol;
 
   //<editor-fold desc="Don't touch">
   @Override
@@ -217,6 +221,14 @@ public class MultiPlayerActivity extends Activity {
     }.execute(SERVER_IP, SERVER_PORT);
   }
 
+  private void DisconnectServer() {
+    try {
+      Connection.close();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+
   private void DisableButtons() {
     for (int a = 0; a < 3; a++) {
       GameButton[a][0].setEnabled(false);
@@ -227,6 +239,32 @@ public class MultiPlayerActivity extends Activity {
 
   private void UpdateStatusTextView(String message) {
     ((TextView) findViewById(R.id.lblStatus)).setText(message);
+  }
+
+  public void onBackPressed() {
+    if (GameBoard.IsGameOver()) {
+      DisconnectServer();
+      finish();
+      return;
+    }
+
+    AlertDialog.Builder alertDialog = new AlertDialog.Builder(MultiPlayerActivity.this);
+    alertDialog.setTitle("Exit");
+    alertDialog.setMessage("Game is in the progress.\nAre you sure want to exit?");
+
+    alertDialog.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+      public void onClick(DialogInterface dialog, int which) {
+        DisconnectServer();
+        finish();
+      }
+    });
+    alertDialog.setNegativeButton("No", new DialogInterface.OnClickListener() {
+      public void onClick(DialogInterface dialog, int which) {
+        dialog.dismiss();
+      }
+    });
+
+    alertDialog.show();
   }
 
   public void onGameButtonsClick(View v, int x, int y, char Player) {
