@@ -21,6 +21,7 @@ import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -31,7 +32,7 @@ import java.net.Socket;
 public class MultiPlayerActivity extends Activity {
 
   //private final String SERVER_IP = "192.168.191.1";
-  private final String SERVER_IP = "192.168.1.4";
+  private final String SERVER_IP = "192.168.1.4";;
   private final String SERVER_PORT = "6666";
 
   private ImageButton[][] GameButton;
@@ -39,6 +40,7 @@ public class MultiPlayerActivity extends Activity {
 
   Context ThisContext = this;
   Socket Connection;
+  boolean swap = false;
 
   char PlayerSymbol;
 
@@ -77,21 +79,21 @@ public class MultiPlayerActivity extends Activity {
     ConnectServer(); // Caution!! The code below will execute when it execute AsyncTask
     //<editor-fold desc="Init">
     GameButton = new ImageButton[][]{
-      {
-        (ImageButton) findViewById(R.id.imageButton1),
-        (ImageButton) findViewById(R.id.imageButton2),
-        (ImageButton) findViewById(R.id.imageButton3)
-      },
-      {
-        (ImageButton) findViewById(R.id.imageButton4),
-        (ImageButton) findViewById(R.id.imageButton5),
-        (ImageButton) findViewById(R.id.imageButton6)
-      },
-      {
-        (ImageButton) findViewById(R.id.imageButton7),
-        (ImageButton) findViewById(R.id.imageButton8),
-        (ImageButton) findViewById(R.id.imageButton9)
-      }
+            {
+                    (ImageButton) findViewById(R.id.imageButton1),
+                    (ImageButton) findViewById(R.id.imageButton2),
+                    (ImageButton) findViewById(R.id.imageButton3)
+            },
+            {
+                    (ImageButton) findViewById(R.id.imageButton4),
+                    (ImageButton) findViewById(R.id.imageButton5),
+                    (ImageButton) findViewById(R.id.imageButton6)
+            },
+            {
+                    (ImageButton) findViewById(R.id.imageButton7),
+                    (ImageButton) findViewById(R.id.imageButton8),
+                    (ImageButton) findViewById(R.id.imageButton9)
+            }
     };
 
     ActionInit();
@@ -103,76 +105,115 @@ public class MultiPlayerActivity extends Activity {
     GameButton[0][0].setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
-        onGameButtonsClick(v, 0, 0, 'O');
-        String changePoint = "0"+" "+"0"+" "+"o";
-        SendGameStatus(changePoint);
+        if(swap == false){
+          onGameButtonsClick(v, 0, 0, 'O');
+          swap = true;
+        }else{
+          onGameButtonsClick(v, 0, 0, 'X');
+          swap = false;
+        }
       }
     });
     GameButton[0][1].setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
-        onGameButtonsClick(v, 0, 1, 'O');
-        String changePoint = "0"+" "+"1"+" "+"o";
-        SendGameStatus(changePoint);
+        if(swap == false){
+          onGameButtonsClick(v, 0, 1, 'O');
+          swap = true;
+        }else{
+          onGameButtonsClick(v, 0, 1, 'X');
+          swap = false;
+        }
       }
     });
     GameButton[0][2].setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
-        onGameButtonsClick(v, 0, 2, 'O');
-        String changePoint = "0"+" "+"2"+" "+"o";
-        SendGameStatus(changePoint);
+        if(swap == false){
+          onGameButtonsClick(v, 0, 2, 'O');
+          swap = true;
+        }else{
+          onGameButtonsClick(v, 0, 2, 'X');
+          swap = false;
+        }
       }
     });
     GameButton[1][0].setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
-        onGameButtonsClick(v, 1, 0, 'O');
-        String changePoint = "1"+" "+"0"+" "+"o";
-        SendGameStatus(changePoint);
+        if(swap == false){
+          onGameButtonsClick(v, 1, 0, 'O');
+          swap = true;
+        }else{
+          onGameButtonsClick(v, 1, 0, 'X');
+          swap = false;
+        }
+
       }
     });
     GameButton[1][1].setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
-        onGameButtonsClick(v, 1, 1, 'O');
-        String changePoint = "1"+" "+"1"+" "+"o";
-        SendGameStatus(changePoint);
+        if(swap == false){
+          onGameButtonsClick(v, 1, 1, 'O');
+          swap = true;
+        }else{
+          onGameButtonsClick(v, 1, 1, 'X');
+          swap = false;
+        }
+
       }
     });
     GameButton[1][2].setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
-        onGameButtonsClick(v, 1, 2, 'O');
-        String changePoint = "1"+" "+"2"+" "+"o";
-        SendGameStatus(changePoint);
+        if(swap == false){
+          onGameButtonsClick(v, 1, 2, 'O');
+          swap = true;
+        }else{
+          onGameButtonsClick(v, 1, 2, 'X');
+          swap = false;
+        }
       }
     });
     GameButton[2][0].setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
-        onGameButtonsClick(v, 2, 0, 'O');
-        String changePoint = "2"+" "+"0"+" "+"o";
-        SendGameStatus(changePoint);
+        if(swap == false){
+          onGameButtonsClick(v, 2, 0, 'O');
+          swap = true;
+        }else{
+          onGameButtonsClick(v, 2, 0, 'X');
+          swap = false;
+        }
       }
     });
     GameButton[2][1].setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
-        onGameButtonsClick(v, 2, 1, 'O');
-        String changePoint = "2"+" "+"1"+" "+"o";
-        SendGameStatus(changePoint);
+        if(swap == false){
+          onGameButtonsClick(v, 2, 1, 'O');
+          swap = true;
+        }else{
+          onGameButtonsClick(v, 2, 1, 'X');
+          swap = false;
+        }
+
       }
     });
     GameButton[2][2].setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
-        onGameButtonsClick(v, 2, 2, 'O');
-        String changePoint = "2"+" "+"2"+" "+"o";
-        SendGameStatus(changePoint);
+        if(swap == false){
+          onGameButtonsClick(v, 2, 2, 'O');
+          swap = true;
+        }else{
+          onGameButtonsClick(v, 2, 2, 'X');
+          swap = false;
+        }
+
       }
     });
-
   }
 
   private void SendGameStatus() {
@@ -180,28 +221,11 @@ public class MultiPlayerActivity extends Activity {
       OutputStream outToServer = Connection.getOutputStream();
       ObjectOutputStream out = new ObjectOutputStream(outToServer);
       out.writeObject(GameBoard.GetBoardStatus());
-
-
-      //out.writeObject("Testing testing 123");
     } catch (IOException e) {
       e.printStackTrace();
     }
   }
 
-  private void SendGameStatus(String changePoint){
-
-    try {
-      OutputStream outToServer = Connection.getOutputStream();
-      //ObjectOutputStream out = new ObjectOutputStream(outToServer);
-      outToServer.write(changePoint.getBytes());
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-  }
-
-  private void ReceiveGameStatus() {
-
-  }
 
   private void ConnectServer() {
     new AsyncTask<String, Void, Void>() {
@@ -225,6 +249,7 @@ public class MultiPlayerActivity extends Activity {
         });
         ConnectServerLoadingDialog.setIndeterminate(true);
         ConnectServerLoadingDialog.show();
+
       }
 
       @Override
@@ -232,6 +257,7 @@ public class MultiPlayerActivity extends Activity {
 
         try {
           Connection = new Socket(Params[0], Integer.parseInt(Params[1]));
+          new Thread( new GameThread(Connection,GameBoard,GameButton) ).start();
         } catch (ConnectException e) {
           ReturnData.setData(Uri.parse("Error. Can't connect to the server."));
           setResult(RESULT_OK, ReturnData);
@@ -251,6 +277,7 @@ public class MultiPlayerActivity extends Activity {
       }
 
     }.execute(SERVER_IP, SERVER_PORT);
+
   }
 
   private void DisconnectServer() {
@@ -299,7 +326,7 @@ public class MultiPlayerActivity extends Activity {
     alertDialog.show();
   }
 
-  public void onGameButtonsClick(View v, Integer x, Integer y, char Player) {
+  public void onGameButtonsClick(View v, int x, int y, char Player) {
 
     Point MovePoint = new Point(x, y);
 
@@ -310,31 +337,10 @@ public class MultiPlayerActivity extends Activity {
 
     GameBoard.SetPlayerMove(MovePoint, Player);
     GameBoard.UpdateBoard(GameButton, MovePoint, Player);
-
-
+    SendGameStatus();
     if (GameBoard.isOWon()) {
       Toast.makeText(this, "You win.", Toast.LENGTH_SHORT).show();
       UpdateStatusTextView("Winner: O");
-      DisableButtons();
-      return;
-    } else if (GameBoard.getAvailableStates().isEmpty()) {
-      Toast.makeText(this, "Draw.", Toast.LENGTH_SHORT).show();
-      UpdateStatusTextView("Draw");
-      DisableButtons();
-      return;
-    }
-
-    /* need computer move
-    // Computer Move
-    UpdateStatusTextView("It's computer turn");
-    GameBoard.CallMinimax(0, 'X');
-    MovePoint = GameBoard.ReturnBestMove();
-    GameBoard.SetPlayerMove(MovePoint, 'X');
-    GameBoard.UpdateBoard(GameButton, MovePoint, 'X');
-
-    if (GameBoard.isXWon()) {
-      Toast.makeText(this, "Computer win.", Toast.LENGTH_SHORT).show();
-      UpdateStatusTextView("Winner: X");
       DisableButtons();
       return;
     }
@@ -344,7 +350,5 @@ public class MultiPlayerActivity extends Activity {
       DisableButtons();
       return;
     }
-    UpdateStatusTextView("It's your turn");
-    */
   }
 }
