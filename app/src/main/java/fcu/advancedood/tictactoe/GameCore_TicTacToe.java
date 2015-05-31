@@ -57,6 +57,28 @@ class Board {
     return BoardStatus;
   }
 
+  public void refreshBoardStatus(char[][] newGameBoard, ImageButton[][] GameButton) {
+    this.BoardStatus = newGameBoard;
+    for(int i=0;i<3;i++){
+      for(int j=0;j<3;j++){
+        //System.out.print(newGameBoard[i][j]+" ");
+        if (this.BoardStatus[i][j] == 'O') {
+          GameButton[i][j].setImageResource(R.drawable.o);
+        } else if (this.BoardStatus[i][j] == 'X') {
+          GameButton[i][j].setImageResource(R.drawable.x);
+        }
+      }
+      //System.out.println();
+    }
+
+    for(int i=0;i<3;i++){
+      for(int j=0;j<3;j++){
+        System.out.print(newGameBoard[i][j]+" ");
+      }
+      System.out.println();
+    }
+  }
+
   private boolean CheckIsWin(char Player) {
 
     for (int i = 0; i < 3; i++) {

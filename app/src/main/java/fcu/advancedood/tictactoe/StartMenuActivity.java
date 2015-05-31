@@ -2,8 +2,12 @@ package fcu.advancedood.tictactoe;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -11,6 +15,7 @@ import android.view.View;
 import android.widget.Toast;
 
 import java.io.IOException;
+import java.net.ConnectException;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
@@ -18,6 +23,8 @@ import java.net.UnknownHostException;
 public class StartMenuActivity extends Activity {
 
   private final int CONNECT_SERVER = 1;
+
+  Context ThisContext = this;
 
   //<editor-fold desc="Don't Touch!" defaultstate="collapsed">
   @Override
