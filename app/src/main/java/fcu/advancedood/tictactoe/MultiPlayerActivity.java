@@ -1,36 +1,26 @@
 package fcu.advancedood.tictactoe;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.ImageButton;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
-import java.net.ConnectException;
 import java.net.Socket;
 
 public class MultiPlayerActivity extends Activity {
 
   //<editor-fold desc="Global Constant and Variable Declaration.">
-  SharedData SharedObj = null;
-  Context ThisContext = this;
-  Socket Connection;
-  Board GameBoard;
+  private SharedConnection SharedObj = null;
+  private Context ThisContext = this;
+  private Socket Connection;
+  private Board GameBoard;
+  private ImageButton[][] GameButton;
 
   /** Message Type Constant Declaration **/
   private final byte CLIENT_CONNECTED = 1;
@@ -38,10 +28,10 @@ public class MultiPlayerActivity extends Activity {
   private final byte GET_PLAYER_SYMBOL = 3;
   /** Message Type Constant Declaration **/
 
-  private ImageButton[][] GameButton;
-  boolean swap = false;
+  /** Game play control**/
+  char cPlayerSymbol;
 
-  char PlayerSymbol;
+  boolean swap = false;
   //</editor-fold>
 
   //<editor-fold desc="Take your own responsibility when you touch this.">
@@ -76,7 +66,7 @@ public class MultiPlayerActivity extends Activity {
   //</editor-fold>
 
   public void Init() {
-    this.SharedObj = (SharedData) getApplicationContext();
+    this.SharedObj = (SharedConnection) getApplicationContext();
     this.Connection = SharedObj.GetSocketConnection();
   }
 
@@ -93,9 +83,9 @@ public class MultiPlayerActivity extends Activity {
               break;
 
             case GET_PLAYER_SYMBOL:
-              PlayerSymbol = in.readChar();
-              Toast.makeText(ThisContext, PlayerSymbol + "", Toast.LENGTH_SHORT).show();
-              Log.v("Symbol", PlayerSymbol + "");
+              cPlayerSymbol = in.readChar();
+              Toast.makeText(ThisContext, cPlayerSymbol + "", Toast.LENGTH_SHORT).show();
+              Log.v("Symbol", cPlayerSymbol + "");
               break;
           }
         }

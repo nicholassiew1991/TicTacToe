@@ -7,12 +7,16 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.net.ConnectException;
 import java.net.Socket;
 
@@ -83,7 +87,9 @@ public class StartMenuActivity extends Activity {
     new AsyncTask<String, Void, Void>() {
 
       ProgressDialog ConnectServerLoadingDialog;
-      SharedData SharedObj = (SharedData) getApplicationContext();
+      SharedConnection SharedObj = (SharedConnection) getApplicationContext();
+
+      char cPlayerSymbol;
 
       @Override
       protected void onPreExecute() {
@@ -94,23 +100,28 @@ public class StartMenuActivity extends Activity {
         ConnectServerLoadingDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
           @Override
           public void onCancel(DialogInterface dialog) {
+            ConnectServerLoadingDialog.dismiss();
             Toast.makeText(ThisContext, "Connection Cancelled.", Toast.LENGTH_SHORT).show();
           }
         });
-        ConnectServerLoadingDialog.setIndeterminate(true);
         ConnectServerLoadingDialog.show();
-
       }
 
       @Override
       protected Void doInBackground(String... Params) {
         try {
           SharedObj.SetSocketConnection(new Socket(Params[0], Integer.parseInt(Params[1])));
+          Connection = SharedObj.GetSocketConnection();
+          ConnectServerLoadingDialog.setTitle("Pairing...");
+          SendWaitParing();
+          cPlayerSymbol = WaitForPlayerSymbol();
         }
         catch (ConnectException e) {
+          ConnectServerLoadingDialog.dismiss();
           Toast.makeText(ThisContext, "Error. Can't connect to the server.", Toast.LENGTH_SHORT).show();
         }
         catch (IOException e) {
+          ConnectServerLoadingDialog.dismiss();
           Toast.makeText(ThisContext, "Unknown error.", Toast.LENGTH_SHORT).show();
         }
         return null;
@@ -120,12 +131,45 @@ public class StartMenuActivity extends Activity {
       protected void onPostExecute(Void result) {
         ConnectServerLoadingDialog.dismiss();
         Intent MultiPlayerActivity = new Intent();
+        MultiPlayerActivity.putExtra("Symbol", cPlayerSymbol);
         MultiPlayerActivity.setClass(StartMenuActivity.this, MultiPlayerActivity.class);
-
         startActivity(MultiPlayerActivity);
       }
 
-    }.execute(SERVER_IP, SERVER_PORT);
+    }.execute(LOCALHOST_IP, SERVER_PORT);
+  }
+
+  private void SendWaitParing() {
+    try {
+      OutputStream OutToServer = Connection.getOutputStream();
+      ObjectOutputStream ToServer = new ObjectOutputStream(OutToServer);
+      ToServer.writeByte(GlobalData.CLIENT_WAIT_PAIRING);
+      ToServer.writeObject("Wait for paring.");
+    }
+    catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+
+  private char WaitForPlayerSymbol() {
+    try {
+      Log.v("Wait", "Start");
+      ObjectInputStream in = new ObjectInputStream(Connection.getInputStream());
+      Log.v("Wait", "End");
+
+      if (in.readByte() == GlobalData.SET_PLAYER_SYMBOL) {
+        char Symbol = ((char) in.readObject());
+        Log.v("Wait", "" + Symbol);
+        return  Symbol;
+      }
+    }
+    catch (IOException e) {
+      e.printStackTrace();
+    }
+    catch (ClassNotFoundException e) {
+      e.printStackTrace();
+    }
+    return 0;
   }
 }
 
