@@ -1,12 +1,10 @@
 package fcu.advancedood.tictactoe;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Menu;
@@ -17,13 +15,13 @@ import android.widget.Toast;
 import java.io.IOException;
 import java.net.ConnectException;
 import java.net.Socket;
-import java.net.UnknownHostException;
 
 
 public class StartMenuActivity extends Activity {
 
   private final int CONNECT_SERVER = 1;
 
+  Socket Connection = null;
   Context ThisContext = this;
 
   //<editor-fold desc="Don't Touch!" defaultstate="collapsed">
@@ -72,21 +70,62 @@ public class StartMenuActivity extends Activity {
   }
 
   public void cmdStartMultiPlayer(View v) {
+    ConnectServer();
+  }
 
-    AlertDialog alertDialogBuilder = new AlertDialog.Builder(StartMenuActivity.this).create();
-    alertDialogBuilder.setTitle("Game in under construction");
-    alertDialogBuilder.setMessage("Please wait patiently.");
+  private void ConnectServer() {
 
-    alertDialogBuilder.setButton(AlertDialog.BUTTON_NEUTRAL, "OK", new DialogInterface.OnClickListener() {
-      public void onClick(DialogInterface dialog, int which) {
+    final String SERVER_IP = "192.168.191.1";
+    final String LOCALHOST_IP = "10.0.2.2";
+    //private final String SERVER_IP = "192.168.1.4";;
+    final String SERVER_PORT = "6666";
+
+    new AsyncTask<String, Void, Void>() {
+
+      ProgressDialog ConnectServerLoadingDialog;
+      SharedData SharedObj = (SharedData) getApplicationContext();
+
+      @Override
+      protected void onPreExecute() {
+        ConnectServerLoadingDialog = new ProgressDialog(ThisContext);
+        ConnectServerLoadingDialog.setTitle("Connecting to server");
+        ConnectServerLoadingDialog.setMessage("Please wait...");
+        ConnectServerLoadingDialog.setCancelable(true);
+        ConnectServerLoadingDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+          @Override
+          public void onCancel(DialogInterface dialog) {
+            Toast.makeText(ThisContext, "Connection Cancelled.", Toast.LENGTH_SHORT).show();
+          }
+        });
+        ConnectServerLoadingDialog.setIndeterminate(true);
+        ConnectServerLoadingDialog.show();
+
+      }
+
+      @Override
+      protected Void doInBackground(String... Params) {
+        try {
+          SharedObj.SetSocketConnection(new Socket(Params[0], Integer.parseInt(Params[1])));
+        }
+        catch (ConnectException e) {
+          Toast.makeText(ThisContext, "Error. Can't connect to the server.", Toast.LENGTH_SHORT).show();
+        }
+        catch (IOException e) {
+          Toast.makeText(ThisContext, "Unknown error.", Toast.LENGTH_SHORT).show();
+        }
+        return null;
+      }
+
+      @Override
+      protected void onPostExecute(Void result) {
+        ConnectServerLoadingDialog.dismiss();
         Intent MultiPlayerActivity = new Intent();
         MultiPlayerActivity.setClass(StartMenuActivity.this, MultiPlayerActivity.class);
-        startActivityForResult(MultiPlayerActivity, CONNECT_SERVER);
-        dialog.dismiss();
-      }
-    });
-    alertDialogBuilder.show();
 
+        startActivity(MultiPlayerActivity);
+      }
+
+    }.execute(SERVER_IP, SERVER_PORT);
   }
 }
 
