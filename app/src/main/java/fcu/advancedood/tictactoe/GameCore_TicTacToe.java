@@ -37,6 +37,15 @@ class Board {
     {'?', '?', '?'}
   };
 
+  public void UpdateWholeBoard(ImageButton[][] GameButton) {
+
+    for (int a = 0; a < BoardStatus.length; a++) {
+      for (int b = 0; b < BoardStatus[a].length; b++) {
+        UpdateBoard(GameButton, new Point(a, b), BoardStatus[a][b]);
+      }
+    }
+  }
+
   public void UpdateBoard(ImageButton[][] GameButton, Point p, char Player) {
     if (Player == 'O') {
       GameButton[p.x][p.y].setImageResource(R.drawable.o);
@@ -45,16 +54,20 @@ class Board {
     }
   }
 
-  public void DisableBoardButtons(ImageButton[][] GameButton) {
+  public void SetButtonsEnabled(ImageButton[][] GameButton, boolean Status) {
     for (int a = 0; a < 3; a++) {
-      GameButton[a][0].setEnabled(false);
-      GameButton[a][1].setEnabled(false);
-      GameButton[a][2].setEnabled(false);
+      GameButton[a][0].setEnabled(Status);
+      GameButton[a][1].setEnabled(Status);
+      GameButton[a][2].setEnabled(Status);
     }
   }
 
   public char[][] GetBoardStatus() {
     return BoardStatus;
+  }
+
+  public void SetBoardStatus(char[][] BoardStatus) {
+    this.BoardStatus = BoardStatus;
   }
 
   public void refreshBoardStatus(char[][] newGameBoard, ImageButton[][] GameButton) {

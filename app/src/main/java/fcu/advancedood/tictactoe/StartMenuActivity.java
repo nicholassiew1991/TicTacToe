@@ -7,7 +7,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -136,14 +135,14 @@ public class StartMenuActivity extends Activity {
         startActivity(MultiPlayerActivity);
       }
 
-    }.execute(LOCALHOST_IP, SERVER_PORT);
+    }.execute(SERVER_IP, SERVER_PORT);
   }
 
   private void SendWaitParing() {
     try {
       OutputStream OutToServer = Connection.getOutputStream();
       ObjectOutputStream ToServer = new ObjectOutputStream(OutToServer);
-      ToServer.writeByte(GlobalData.CLIENT_WAIT_PAIRING);
+      ToServer.writeByte(Globals.CLIENT_WAIT_PAIRING);
       ToServer.writeObject("Wait for paring.");
     }
     catch (IOException e) {
@@ -153,13 +152,10 @@ public class StartMenuActivity extends Activity {
 
   private char WaitForPlayerSymbol() {
     try {
-      Log.v("Wait", "Start");
       ObjectInputStream in = new ObjectInputStream(Connection.getInputStream());
-      Log.v("Wait", "End");
 
-      if (in.readByte() == GlobalData.SET_PLAYER_SYMBOL) {
+      if (in.readByte() == Globals.SET_PLAYER_SYMBOL) {
         char Symbol = ((char) in.readObject());
-        Log.v("Wait", "" + Symbol);
         return  Symbol;
       }
     }

@@ -3,14 +3,16 @@ package fcu.advancedood.tictactoe;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.net.Socket;
 
 public class MultiPlayerActivity extends Activity {
@@ -22,16 +24,8 @@ public class MultiPlayerActivity extends Activity {
   private Board GameBoard;
   private ImageButton[][] GameButton;
 
-  /** Message Type Constant Declaration **/
-  private final byte CLIENT_CONNECTED = 1;
-  private final byte BOARD_STATUS = 2;
-  private final byte GET_PLAYER_SYMBOL = 3;
-  /** Message Type Constant Declaration **/
-
   /** Game play control**/
-  char cPlayerSymbol;
-
-  boolean swap = false;
+  private char cPlayerSymbol;
   //</editor-fold>
 
   //<editor-fold desc="Take your own responsibility when you touch this.">
@@ -65,9 +59,91 @@ public class MultiPlayerActivity extends Activity {
   }
   //</editor-fold>
 
-  public void Init() {
+  private void Init() {
+
+    /** Get data passed from previous activity. **/
+    Bundle IntentData = getIntent().getExtras();
+    this.cPlayerSymbol = IntentData.getChar("Symbol");
+
+    /** Game initializing. **/
+    this.GameBoard = new Board();
+    GameButton = new ImageButton[][]{
+      {
+        (ImageButton) findViewById(R.id.imageButton1),
+        (ImageButton) findViewById(R.id.imageButton2),
+        (ImageButton) findViewById(R.id.imageButton3)
+      },
+      {
+        (ImageButton) findViewById(R.id.imageButton4),
+        (ImageButton) findViewById(R.id.imageButton5),
+        (ImageButton) findViewById(R.id.imageButton6)
+      },
+      {
+        (ImageButton) findViewById(R.id.imageButton7),
+        (ImageButton) findViewById(R.id.imageButton8),
+        (ImageButton) findViewById(R.id.imageButton9)
+      }
+    };
+    ActionInit();
+    if (cPlayerSymbol == 'O') {
+      Globals.ShowToastMessage(ThisContext, "You take first", Toast.LENGTH_SHORT);
+    }
+    else {
+      Globals.ShowToastMessage(ThisContext, "Opponent take first", Toast.LENGTH_SHORT);
+      GameBoard.SetButtonsEnabled(GameButton, false);
+    }
+
     this.SharedObj = (SharedConnection) getApplicationContext();
     this.Connection = SharedObj.GetSocketConnection();
+    new ReceiveMessages().start();
+  }
+
+  private void ActionInit() {
+    for (int a = 0; a < 3; a++) {
+      for (int b = 0; b < 3; b++) {
+        GameButtonActionInit(a, b);
+      }
+    }
+  }
+
+  private void GameButtonActionInit(int x, int y) {
+
+    final int PointX = x;
+    final int PointY = y;
+    GameButton[x][y].setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View v) {
+        OnGameButtonClicked(PointX, PointY);
+      }
+    });
+  }
+
+  private void OnGameButtonClicked(int x, int y) {
+
+    Point MovePoint = new Point(x, y);
+
+    if (GameBoard.isPointAvailable(MovePoint) == false) {
+      Toast.makeText(this, "This point in not available.", Toast.LENGTH_SHORT).show();
+      return;
+    }
+
+    GameBoard.SetPlayerMove(MovePoint, cPlayerSymbol);
+    GameBoard.UpdateBoard(GameButton, MovePoint, cPlayerSymbol);
+    SendGameStatus();
+    GameBoard.SetButtonsEnabled(GameButton, false);
+    Globals.ShowToastMessage(ThisContext, "It's opponent turn.", Toast.LENGTH_SHORT);
+  }
+
+  private void SendGameStatus() {
+    try {
+      OutputStream outToServer = Connection.getOutputStream();
+      ObjectOutputStream out = new ObjectOutputStream(outToServer);
+      out.writeByte(Globals.BOARD_STATUS);
+      out.writeObject(GameBoard.GetBoardStatus());
+    }
+    catch (IOException e) {
+      e.printStackTrace();
+    }
   }
 
   private class ReceiveMessages extends Thread {
@@ -78,14 +154,11 @@ public class MultiPlayerActivity extends Activity {
           ObjectInputStream in = new ObjectInputStream(Connection.getInputStream());
 
           switch (in.readByte()) {
-            case BOARD_STATUS:
-              GameBoard.refreshBoardStatus((char[][]) in.readObject(), GameButton);
-              break;
-
-            case GET_PLAYER_SYMBOL:
-              cPlayerSymbol = in.readChar();
-              Toast.makeText(ThisContext, cPlayerSymbol + "", Toast.LENGTH_SHORT).show();
-              Log.v("Symbol", cPlayerSymbol + "");
+            case Globals.BOARD_STATUS:
+              GameBoard.SetBoardStatus(((char[][]) in.readObject()));
+              GameBoard.UpdateWholeBoard(GameButton);
+              GameBoard.SetButtonsEnabled(GameButton, true);
+              Globals.ShowToastMessage(ThisContext, "It's your turn.", Toast.LENGTH_SHORT);
               break;
           }
         }

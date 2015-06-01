@@ -172,13 +172,13 @@ public class NewSinglePlayerActivity extends Activity {
     if (GameBoard.isOWon()) {
       Toast.makeText(this, "You win.", Toast.LENGTH_SHORT).show();
       UpdateStatusTextView("Winner: O");
-      GameBoard.DisableBoardButtons(GameButton);
+      GameBoard.SetButtonsEnabled(GameButton, false);
       return;
     }
     else if (GameBoard.getAvailableStates().isEmpty()) {
       Toast.makeText(this, "Draw.", Toast.LENGTH_SHORT).show();
       UpdateStatusTextView("Draw");
-      GameBoard.DisableBoardButtons(GameButton);
+      GameBoard.SetButtonsEnabled(GameButton, false);
       return;
     }
 
@@ -192,13 +192,13 @@ public class NewSinglePlayerActivity extends Activity {
     if (GameBoard.isXWon()) {
       Toast.makeText(this, "Computer win.", Toast.LENGTH_SHORT).show();
       UpdateStatusTextView("Winner: X");
-      GameBoard.DisableBoardButtons(GameButton);
+      GameBoard.SetButtonsEnabled(GameButton, false);
       return;
     }
     else if (GameBoard.getAvailableStates().isEmpty()) {
       Toast.makeText(this, "Draw.", Toast.LENGTH_SHORT).show();
       UpdateStatusTextView("Draw");
-      GameBoard.DisableBoardButtons(GameButton);
+      GameBoard.SetButtonsEnabled(GameButton, false);
       return;
     }
 
