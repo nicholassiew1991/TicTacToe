@@ -24,7 +24,7 @@ public class MultiPlayerActivity extends Activity {
   private Board GameBoard;
   private ImageButton[][] GameButton;
 
-  /** Game play control**/
+  /** Game play control variable declaration. **/
   private char cPlayerSymbol;
   //</editor-fold>
 
@@ -59,6 +59,7 @@ public class MultiPlayerActivity extends Activity {
   }
   //</editor-fold>
 
+  //<editor-fold desc="Initialization">
   private void Init() {
 
     /** Get data passed from previous activity. **/
@@ -117,13 +118,14 @@ public class MultiPlayerActivity extends Activity {
       }
     });
   }
+  //</editor-fold>
 
   private void OnGameButtonClicked(int x, int y) {
 
     Point MovePoint = new Point(x, y);
 
     if (GameBoard.isPointAvailable(MovePoint) == false) {
-      Toast.makeText(this, "This point in not available.", Toast.LENGTH_SHORT).show();
+      Globals.ShowToastMessage(this, "This point in not available.", Toast.LENGTH_SHORT);
       return;
     }
 

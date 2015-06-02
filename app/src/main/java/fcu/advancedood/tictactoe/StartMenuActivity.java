@@ -1,6 +1,7 @@
 package fcu.advancedood.tictactoe;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -21,8 +22,6 @@ import java.net.Socket;
 
 
 public class StartMenuActivity extends Activity {
-
-  private final int CONNECT_SERVER = 1;
 
   Socket Connection = null;
   Context ThisContext = this;
@@ -56,15 +55,6 @@ public class StartMenuActivity extends Activity {
     return super.onOptionsItemSelected(item);
   }
   //</editor-fold>
-
-  @Override
-  protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-    if (requestCode == CONNECT_SERVER) {
-      if (resultCode == RESULT_OK) {
-        Toast.makeText(this, data.getData().toString(), Toast.LENGTH_SHORT).show();
-      }
-    }
-  }
 
   public void cmdStartSinglePlayer(View v) {
     Intent SinglePlayerActivity = new Intent();
