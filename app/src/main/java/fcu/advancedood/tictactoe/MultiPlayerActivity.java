@@ -3,12 +3,16 @@ package fcu.advancedood.tictactoe;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
+import java.io.DataInput;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -96,7 +100,8 @@ public class MultiPlayerActivity extends Activity {
 
     this.SharedObj = (SharedConnection) getApplicationContext();
     this.Connection = SharedObj.GetSocketConnection();
-    new ReceiveMessages().start();
+    //new ReceiveMessages().start();
+    new NewReceiveMessages().start();
   }
 
   private void ActionInit() {
@@ -131,23 +136,55 @@ public class MultiPlayerActivity extends Activity {
 
     GameBoard.SetPlayerMove(MovePoint, cPlayerSymbol);
     GameBoard.UpdateBoard(GameButton, MovePoint, cPlayerSymbol);
-    SendGameStatus();
+    NewSendGameStatus();
     GameBoard.SetButtonsEnabled(GameButton, false);
     Globals.ShowToastMessage(ThisContext, "It's opponent turn.", Toast.LENGTH_SHORT);
   }
 
-  private void SendGameStatus() {
+  private void NewSendGameStatus() {
     try {
-      OutputStream outToServer = Connection.getOutputStream();
-      ObjectOutputStream out = new ObjectOutputStream(outToServer);
-      out.writeByte(Globals.BOARD_STATUS);
-      out.writeObject(GameBoard.GetBoardStatus());
+      char[][] BoardStatus = GameBoard.GetBoardStatus();
+      DataOutputStream dOut = new DataOutputStream(Connection.getOutputStream());
+      dOut.writeByte(Globals.BOARD_STATUS);
+      for (int a = 0; a < 3; a++) {
+        for (int b = 0; b < 3; b++) {
+          dOut.writeChar(BoardStatus[a][b]);
+        }
+      }
+      dOut.flush(); // Send out
     }
     catch (IOException e) {
       e.printStackTrace();
     }
   }
 
+  private class NewReceiveMessages extends Thread {
+    public void run() {
+      while (true) {
+        try {
+          DataInputStream in = new DataInputStream(Connection.getInputStream());
+
+          byte MessagesType = in.readByte();
+
+          if (MessagesType == Globals.BOARD_STATUS) {
+            char[][] BoardStatus = new char[3][3];
+
+            for (int a = 0; a < 3; a++) {
+              for (int b = 0; b < 3; b++) {
+                BoardStatus[a][b] = in.readChar();
+              }
+            }
+            GameBoard.SetBoardStatus(BoardStatus);
+          }
+        }
+        catch (IOException ex) {
+          ex.printStackTrace();
+        }
+      }
+    }
+  }
+
+  //<editor-fold desc="Not use temporary.">
   private class ReceiveMessages extends Thread {
 
     public void run() {
@@ -170,4 +207,17 @@ public class MultiPlayerActivity extends Activity {
       }
     }
   }
+
+  private void SendGameStatus() {
+    try {
+      OutputStream outToServer = Connection.getOutputStream();
+      ObjectOutputStream out = new ObjectOutputStream(outToServer);
+      out.writeByte(Globals.BOARD_STATUS);
+      out.writeObject(GameBoard.GetBoardStatus());
+    }
+    catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+  //</editor-fold desc="Not use temporary.">
 }

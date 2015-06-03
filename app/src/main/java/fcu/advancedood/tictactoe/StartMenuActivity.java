@@ -101,7 +101,6 @@ public class StartMenuActivity extends Activity {
         try {
           SharedObj.SetSocketConnection(new Socket(Params[0], Integer.parseInt(Params[1])));
           Connection = SharedObj.GetSocketConnection();
-          ConnectServerLoadingDialog.setTitle("Pairing...");
           SendWaitParing();
           cPlayerSymbol = WaitForPlayerSymbol();
         }
