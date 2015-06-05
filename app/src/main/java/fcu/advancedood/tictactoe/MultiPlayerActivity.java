@@ -1,7 +1,9 @@
 package fcu.advancedood.tictactoe;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -30,6 +32,7 @@ public class MultiPlayerActivity extends Activity {
 
   /** Game play control variable declaration. **/
   private char cPlayerSymbol;
+  private char cOpponentSymbol;
   //</editor-fold>
 
   //<editor-fold desc="Take your own responsibility when you touch this.">
@@ -91,9 +94,11 @@ public class MultiPlayerActivity extends Activity {
     };
     ActionInit();
     if (cPlayerSymbol == 'O') {
+      cOpponentSymbol = 'X';
       Globals.ShowToastMessage(ThisContext, "You take first", Toast.LENGTH_SHORT);
     }
     else {
+      cOpponentSymbol = 'O';
       Globals.ShowToastMessage(ThisContext, "Opponent take first", Toast.LENGTH_SHORT);
       GameBoard.SetButtonsEnabled(GameButton, false);
     }
@@ -138,7 +143,16 @@ public class MultiPlayerActivity extends Activity {
     GameBoard.UpdateBoard(GameButton, MovePoint, cPlayerSymbol);
     NewSendGameStatus();
     GameBoard.SetButtonsEnabled(GameButton, false);
-    Globals.ShowToastMessage(ThisContext, "It's opponent turn.", Toast.LENGTH_SHORT);
+
+    if (GameBoard.CheckIsPlayerWin(cPlayerSymbol)) {
+      Toast.makeText(ThisContext, "You win.", Toast.LENGTH_SHORT).show();
+    }
+    else if (GameBoard.GetAvailableStates().isEmpty()) {
+      Toast.makeText(ThisContext, "Draw.", Toast.LENGTH_SHORT).show();
+    }
+    else {
+      Toast.makeText(ThisContext, "It's opponent turn.", Toast.LENGTH_SHORT).show();
+    }
   }
 
   private void NewSendGameStatus() {
@@ -175,6 +189,24 @@ public class MultiPlayerActivity extends Activity {
               }
             }
             GameBoard.SetBoardStatus(BoardStatus);
+
+            runOnUiThread(new Runnable() {
+              @Override
+              public void run() {
+                GameBoard.UpdateWholeBoard(GameButton);
+                GameBoard.SetButtonsEnabled(GameButton, true);
+
+                if (GameBoard.CheckIsPlayerWin(cOpponentSymbol)) {
+                  Toast.makeText(ThisContext, "Opponent win.", Toast.LENGTH_SHORT).show();
+                }
+                else if (GameBoard.GetAvailableStates().isEmpty()) {
+                  Toast.makeText(ThisContext, "Draw.", Toast.LENGTH_SHORT).show();
+                }
+                else {
+                  Toast.makeText(ThisContext, "It's your turn.", Toast.LENGTH_SHORT).show();
+                }
+              }
+            });
           }
         }
         catch (IOException ex) {
@@ -183,41 +215,4 @@ public class MultiPlayerActivity extends Activity {
       }
     }
   }
-
-  //<editor-fold desc="Not use temporary.">
-  private class ReceiveMessages extends Thread {
-
-    public void run() {
-      while (true) {
-        try {
-          ObjectInputStream in = new ObjectInputStream(Connection.getInputStream());
-
-          switch (in.readByte()) {
-            case Globals.BOARD_STATUS:
-              GameBoard.SetBoardStatus(((char[][]) in.readObject()));
-              GameBoard.UpdateWholeBoard(GameButton);
-              GameBoard.SetButtonsEnabled(GameButton, true);
-              Globals.ShowToastMessage(ThisContext, "It's your turn.", Toast.LENGTH_SHORT);
-              break;
-          }
-        }
-        catch (IOException | ClassNotFoundException ex) {
-          ex.printStackTrace();
-        }
-      }
-    }
-  }
-
-  private void SendGameStatus() {
-    try {
-      OutputStream outToServer = Connection.getOutputStream();
-      ObjectOutputStream out = new ObjectOutputStream(outToServer);
-      out.writeByte(Globals.BOARD_STATUS);
-      out.writeObject(GameBoard.GetBoardStatus());
-    }
-    catch (IOException e) {
-      e.printStackTrace();
-    }
-  }
-  //</editor-fold desc="Not use temporary.">
 }

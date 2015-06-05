@@ -32,6 +32,12 @@
             android:name=".MultiPlayerActivity"
             android:label="@string/title_activity_multi_player" >
         </activity>
+
+        <receiver android:name=".GameBroadcastReceiver">
+            <intent-filter>
+                <action android:name="fcu.advancedood.tictactoe.UPDATE_BOARD" />
+            </intent-filter>
+        </receiver>
     </application>
 
 

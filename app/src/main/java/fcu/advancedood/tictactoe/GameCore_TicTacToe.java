@@ -37,20 +37,28 @@ class Board {
     {'?', '?', '?'}
   };
 
-  public void UpdateWholeBoard(ImageButton[][] GameButton) {
+  public char[][] GetBoardStatus() {
+    return BoardStatus;
+  }
 
-    for (int a = 0; a < BoardStatus.length; a++) {
-      for (int b = 0; b < BoardStatus[a].length; b++) {
-        UpdateBoard(GameButton, new Point(a, b), BoardStatus[a][b]);
-      }
-    }
+  public void SetBoardStatus(char[][] BoardStatus) {
+    this.BoardStatus = BoardStatus;
   }
 
   public void UpdateBoard(ImageButton[][] GameButton, Point p, char Player) {
     if (Player == 'O') {
       GameButton[p.x][p.y].setImageResource(R.drawable.o);
-    } else if (Player == 'X') {
+    }
+    else if (Player == 'X') {
       GameButton[p.x][p.y].setImageResource(R.drawable.x);
+    }
+  }
+
+  public void UpdateWholeBoard(ImageButton[][] GameButton) {
+    for (int a = 0; a < BoardStatus.length; a++) {
+      for (int b = 0; b < BoardStatus[a].length; b++) {
+        UpdateBoard(GameButton, new Point(a, b), BoardStatus[a][b]);
+      }
     }
   }
 
@@ -62,37 +70,7 @@ class Board {
     }
   }
 
-  public char[][] GetBoardStatus() {
-    return BoardStatus;
-  }
-
-  public void SetBoardStatus(char[][] BoardStatus) {
-    this.BoardStatus = BoardStatus;
-  }
-
-  public void refreshBoardStatus(char[][] newGameBoard, ImageButton[][] GameButton) {
-    this.BoardStatus = newGameBoard;
-    for(int i=0;i<3;i++){
-      for(int j=0;j<3;j++){
-        //System.out.print(newGameBoard[i][j]+" ");
-        if (this.BoardStatus[i][j] == 'O') {
-          GameButton[i][j].setImageResource(R.drawable.o);
-        } else if (this.BoardStatus[i][j] == 'X') {
-          GameButton[i][j].setImageResource(R.drawable.x);
-        }
-      }
-      //System.out.println();
-    }
-
-    for(int i=0;i<3;i++){
-      for(int j=0;j<3;j++){
-        System.out.print(newGameBoard[i][j]+" ");
-      }
-      System.out.println();
-    }
-  }
-
-  private boolean CheckIsWin(char Player) {
+  public boolean CheckIsPlayerWin(char Player) {
 
     for (int i = 0; i < 3; i++) {
       if (BoardStatus[i][0] == Player && BoardStatus[i][1] == Player && BoardStatus[i][2] == Player) {
@@ -114,7 +92,7 @@ class Board {
      return false;
   }
 
-  public List<Point> getAvailableStates() {
+  public List<Point> GetAvailableStates() {
     availablePoints = new ArrayList<>();
     for (int i = 0; i < 3; ++i) {
       for (int j = 0; j < 3; ++j) {
@@ -126,16 +104,8 @@ class Board {
     return availablePoints;
   }
 
-  public boolean isXWon() {
-    return CheckIsWin('X');
-  }
-
-  public boolean isOWon() {
-    return CheckIsWin('O');
-  }
-
   public boolean IsGameOver() {
-    return (getAvailableStates().isEmpty() || isXWon() || isOWon());
+    return (GetAvailableStates().isEmpty() || CheckIsPlayerWin('X') || CheckIsPlayerWin('O'));
   }
 
   public boolean isPointAvailable(Point p) {
@@ -190,14 +160,14 @@ class Board {
 
   private int Minimax(int depth, char PlayerTurn) {
 
-    if (isXWon()) {
+    if (CheckIsPlayerWin('X')) {
       return +1;
     }
-    if (isOWon()) {
+    if (CheckIsPlayerWin('O')) {
       return -1;
     }
 
-    List<Point> pointsAvailable = getAvailableStates();
+    List<Point> pointsAvailable = GetAvailableStates();
     if (pointsAvailable.isEmpty()) {
       return 0;
     }
