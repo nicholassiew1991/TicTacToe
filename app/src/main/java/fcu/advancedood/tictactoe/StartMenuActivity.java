@@ -68,11 +68,6 @@ public class StartMenuActivity extends Activity {
 
   private void ConnectServer() {
 
-    final String SERVER_IP = "192.168.191.1";
-    final String LOCALHOST_IP = "10.0.2.2";
-    //private final String SERVER_IP = "192.168.1.4";;
-    final String SERVER_PORT = "6666";
-
     new AsyncTask<String, Void, Void>() {
 
       ProgressDialog ConnectServerLoadingDialog;
@@ -124,7 +119,7 @@ public class StartMenuActivity extends Activity {
         startActivity(MultiPlayerActivity);
       }
 
-    }.execute(SERVER_IP, SERVER_PORT);
+    }.execute(Globals.SERVER_ADDRESS, Globals.SERVER_PORT);
   }
 
   private void SendWaitParing() {
