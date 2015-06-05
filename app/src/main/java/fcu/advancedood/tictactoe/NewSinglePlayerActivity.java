@@ -169,16 +169,16 @@ public class NewSinglePlayerActivity extends Activity {
     GameBoard.SetPlayerMove(MovePoint, Player);
     GameBoard.UpdateBoard(GameButton, MovePoint, Player);
 
-    if (GameBoard.isOWon()) {
+    if (GameBoard.CheckIsPlayerWin('O')) {
       Toast.makeText(this, "You win.", Toast.LENGTH_SHORT).show();
       UpdateStatusTextView("Winner: O");
-      GameBoard.DisableBoardButtons(GameButton);
+      GameBoard.SetButtonsEnabled(GameButton, false);
       return;
     }
-    else if (GameBoard.getAvailableStates().isEmpty()) {
+    else if (GameBoard.GetAvailableStates().isEmpty()) {
       Toast.makeText(this, "Draw.", Toast.LENGTH_SHORT).show();
       UpdateStatusTextView("Draw");
-      GameBoard.DisableBoardButtons(GameButton);
+      GameBoard.SetButtonsEnabled(GameButton, false);
       return;
     }
 
@@ -189,16 +189,16 @@ public class NewSinglePlayerActivity extends Activity {
     GameBoard.SetPlayerMove(MovePoint, 'X');
     GameBoard.UpdateBoard(GameButton, MovePoint, 'X');
 
-    if (GameBoard.isXWon()) {
+    if (GameBoard.CheckIsPlayerWin('X')) {
       Toast.makeText(this, "Computer win.", Toast.LENGTH_SHORT).show();
       UpdateStatusTextView("Winner: X");
-      GameBoard.DisableBoardButtons(GameButton);
+      GameBoard.SetButtonsEnabled(GameButton, false);
       return;
     }
-    else if (GameBoard.getAvailableStates().isEmpty()) {
+    else if (GameBoard.GetAvailableStates().isEmpty()) {
       Toast.makeText(this, "Draw.", Toast.LENGTH_SHORT).show();
       UpdateStatusTextView("Draw");
-      GameBoard.DisableBoardButtons(GameButton);
+      GameBoard.SetButtonsEnabled(GameButton, false);
       return;
     }
 

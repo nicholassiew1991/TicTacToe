@@ -1,48 +1,41 @@
 package fcu.advancedood.tictactoe;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import java.io.BufferedWriter;
-import java.io.ByteArrayOutputStream;
+import java.io.DataInput;
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.net.ConnectException;
-import java.net.NoRouteToHostException;
 import java.net.Socket;
 
 public class MultiPlayerActivity extends Activity {
 
-  //private final String SERVER_IP = "192.168.191.1";
-  private final String SERVER_IP = "10.0.2.2";
-  private final String SERVER_PORT = "6666";
-
+  //<editor-fold desc="Global Constant and Variable Declaration.">
+  private SharedConnection SharedObj = null;
+  private Context ThisContext = this;
+  private Socket Connection;
+  private Board GameBoard;
   private ImageButton[][] GameButton;
-  Board GameBoard = new Board();
 
-  Context ThisContext = this;
-  Socket Connection;
+  /** Game play control variable declaration. **/
+  private char cPlayerSymbol;
+  private char cOpponentSymbol;
+  //</editor-fold>
 
-  char PlayerSymbol;
-
-  //<editor-fold desc="Don't touch">
+  //<editor-fold desc="Take your own responsibility when you touch this.">
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -73,9 +66,15 @@ public class MultiPlayerActivity extends Activity {
   }
   //</editor-fold>
 
-  public void Init() {
-    ConnectServer(); // Caution!! The code below will execute when it execute AsyncTask
-    //<editor-fold desc="Init">
+  //<editor-fold desc="Initialization">
+  private void Init() {
+
+    /** Get data passed from previous activity. **/
+    Bundle IntentData = getIntent().getExtras();
+    this.cPlayerSymbol = IntentData.getChar("Symbol");
+
+    /** Game initializing. **/
+    this.GameBoard = new Board();
     GameButton = new ImageButton[][]{
       {
         (ImageButton) findViewById(R.id.imageButton1),
@@ -93,225 +92,127 @@ public class MultiPlayerActivity extends Activity {
         (ImageButton) findViewById(R.id.imageButton9)
       }
     };
-
     ActionInit();
-    //</editor-fold>
+    if (cPlayerSymbol == 'O') {
+      cOpponentSymbol = 'X';
+      Globals.ShowToastMessage(ThisContext, "You take first", Toast.LENGTH_SHORT);
+    }
+    else {
+      cOpponentSymbol = 'O';
+      Globals.ShowToastMessage(ThisContext, "Opponent take first", Toast.LENGTH_SHORT);
+      GameBoard.SetButtonsEnabled(GameButton, false);
+    }
+
+    this.SharedObj = (SharedConnection) getApplicationContext();
+    this.Connection = SharedObj.GetSocketConnection();
+    //new ReceiveMessages().start();
+    new NewReceiveMessages().start();
   }
 
   private void ActionInit() {
-    /*
-    GameButton[0][0].setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View v) {
-        onGameButtonsClick(v, 0, 0, 'O');
-      }
-    });
-    GameButton[0][1].setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View v) {
-        onGameButtonsClick(v, 0, 1, 'O');
-      }
-    });
-    GameButton[0][2].setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View v) {
-        onGameButtonsClick(v, 0, 2, 'O');
-      }
-    });
-    GameButton[1][0].setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View v) {
-        onGameButtonsClick(v, 1, 0, 'O');
-      }
-    });
-    GameButton[1][1].setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View v) {
-        onGameButtonsClick(v, 1, 1, 'O');
-      }
-    });
-    GameButton[1][2].setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View v) {
-        onGameButtonsClick(v, 1, 2, 'O');
-      }
-    });
-    GameButton[2][0].setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View v) {
-        onGameButtonsClick(v, 2, 0, 'O');
-      }
-    });
-    GameButton[2][1].setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View v) {
-        onGameButtonsClick(v, 2, 1, 'O');
-      }
-    });
-    GameButton[2][2].setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View v) {
-        onGameButtonsClick(v, 2, 2, 'O');
-      }
-    });
-    */
-  }
-
-  private void SendGameStatus() {
-    try {
-      OutputStream outToServer = Connection.getOutputStream();
-      ObjectOutputStream out = new ObjectOutputStream(outToServer);
-      out.writeObject(GameBoard.GetBoardStatus());
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-  }
-
-  private void ReceiveGameStatus() {
-
-  }
-
-  private void ConnectServer() {
-    new AsyncTask<String, Void, Void>() {
-
-      ProgressDialog ConnectServerLoadingDialog;
-      Intent ReturnData = new Intent();
-
-      @Override
-      protected void onPreExecute() {
-        ConnectServerLoadingDialog = new ProgressDialog(ThisContext);
-        ConnectServerLoadingDialog.setTitle("Connecting to server");
-        ConnectServerLoadingDialog.setMessage("Please wait...");
-        ConnectServerLoadingDialog.setCancelable(true);
-        ConnectServerLoadingDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
-          @Override
-          public void onCancel(DialogInterface dialog) {
-            ReturnData.setData(Uri.parse("Connection cancelled."));
-            setResult(RESULT_OK, ReturnData);
-            finish();
-          }
-        });
-        ConnectServerLoadingDialog.setIndeterminate(true);
-        ConnectServerLoadingDialog.show();
-      }
-
-      @Override
-      protected Void doInBackground(String... Params) {
-
-        try {
-          Connection = new Socket(Params[0], Integer.parseInt(Params[1]));
-        } catch (ConnectException e) {
-          ReturnData.setData(Uri.parse("Error. Can't connect to the server."));
-          setResult(RESULT_OK, ReturnData);
-          finish();
-        } catch (IOException e) {
-          e.printStackTrace();
-          ReturnData.setData(Uri.parse("Unknown error."));
-          setResult(RESULT_OK, ReturnData);
-          finish();
-        }
-        return null;
-      }
-
-      @Override
-      protected void onPostExecute(Void result) {
-        ConnectServerLoadingDialog.dismiss();
-      }
-
-    }.execute(SERVER_IP, SERVER_PORT);
-  }
-
-  private void DisconnectServer() {
-    try {
-      Connection.close();
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-  }
-
-  private void DisableButtons() {
     for (int a = 0; a < 3; a++) {
-      GameButton[a][0].setEnabled(false);
-      GameButton[a][1].setEnabled(false);
-      GameButton[a][2].setEnabled(false);
+      for (int b = 0; b < 3; b++) {
+        GameButtonActionInit(a, b);
+      }
     }
   }
 
-  private void UpdateStatusTextView(String message) {
-    ((TextView) findViewById(R.id.lblStatus)).setText(message);
-  }
+  private void GameButtonActionInit(int x, int y) {
 
-  public void onBackPressed() {
-    if (GameBoard.IsGameOver()) {
-      DisconnectServer();
-      finish();
-      return;
-    }
-
-    AlertDialog.Builder alertDialog = new AlertDialog.Builder(MultiPlayerActivity.this);
-    alertDialog.setTitle("Exit");
-    alertDialog.setMessage("Game is in the progress.\nAre you sure want to exit?");
-
-    alertDialog.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-      public void onClick(DialogInterface dialog, int which) {
-        DisconnectServer();
-        finish();
+    final int PointX = x;
+    final int PointY = y;
+    GameButton[x][y].setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View v) {
+        OnGameButtonClicked(PointX, PointY);
       }
     });
-    alertDialog.setNegativeButton("No", new DialogInterface.OnClickListener() {
-      public void onClick(DialogInterface dialog, int which) {
-        dialog.dismiss();
-      }
-    });
-
-    alertDialog.show();
   }
+  //</editor-fold>
 
-  public void onGameButtonsClick(View v, int x, int y, char Player) {
+  private void OnGameButtonClicked(int x, int y) {
 
     Point MovePoint = new Point(x, y);
 
     if (GameBoard.isPointAvailable(MovePoint) == false) {
-      Toast.makeText(this, "This point in not available.", Toast.LENGTH_SHORT).show();
+      Globals.ShowToastMessage(this, "This point in not available.", Toast.LENGTH_SHORT);
       return;
     }
 
-    GameBoard.SetPlayerMove(MovePoint, Player);
-    GameBoard.UpdateBoard(GameButton, MovePoint, Player);
+    GameBoard.SetPlayerMove(MovePoint, cPlayerSymbol);
+    GameBoard.UpdateBoard(GameButton, MovePoint, cPlayerSymbol);
+    NewSendGameStatus();
+    GameBoard.SetButtonsEnabled(GameButton, false);
 
-    if (GameBoard.isOWon()) {
-      Toast.makeText(this, "You win.", Toast.LENGTH_SHORT).show();
-      UpdateStatusTextView("Winner: O");
-      DisableButtons();
-      return;
+    if (GameBoard.CheckIsPlayerWin(cPlayerSymbol)) {
+      Toast.makeText(ThisContext, "You win.", Toast.LENGTH_SHORT).show();
     }
-    else if (GameBoard.getAvailableStates().isEmpty()) {
-      Toast.makeText(this, "Draw.", Toast.LENGTH_SHORT).show();
-      UpdateStatusTextView("Draw");
-      DisableButtons();
-      return;
+    else if (GameBoard.GetAvailableStates().isEmpty()) {
+      Toast.makeText(ThisContext, "Draw.", Toast.LENGTH_SHORT).show();
     }
+    else {
+      Toast.makeText(ThisContext, "It's opponent turn.", Toast.LENGTH_SHORT).show();
+    }
+  }
 
-    // Computer Move
-    UpdateStatusTextView("It's computer turn");
-    GameBoard.CallMinimax(0, 'X');
-    MovePoint = GameBoard.ReturnBestMove();
-    GameBoard.SetPlayerMove(MovePoint, 'X');
-    GameBoard.UpdateBoard(GameButton, MovePoint, 'X');
-
-    if (GameBoard.isXWon()) {
-      Toast.makeText(this, "Computer win.", Toast.LENGTH_SHORT).show();
-      UpdateStatusTextView("Winner: X");
-      DisableButtons();
-      return;
+  private void NewSendGameStatus() {
+    try {
+      char[][] BoardStatus = GameBoard.GetBoardStatus();
+      DataOutputStream dOut = new DataOutputStream(Connection.getOutputStream());
+      dOut.writeByte(Globals.BOARD_STATUS);
+      for (int a = 0; a < 3; a++) {
+        for (int b = 0; b < 3; b++) {
+          dOut.writeChar(BoardStatus[a][b]);
+        }
+      }
+      dOut.flush(); // Send out
     }
-    else if (GameBoard.getAvailableStates().isEmpty()) {
-      Toast.makeText(this, "Draw.", Toast.LENGTH_SHORT).show();
-      UpdateStatusTextView("Draw");
-      DisableButtons();
-      return;
+    catch (IOException e) {
+      e.printStackTrace();
     }
+  }
 
-    UpdateStatusTextView("It's your turn");
+  private class NewReceiveMessages extends Thread {
+    public void run() {
+      while (true) {
+        try {
+          DataInputStream in = new DataInputStream(Connection.getInputStream());
+
+          byte MessagesType = in.readByte();
+
+          if (MessagesType == Globals.BOARD_STATUS) {
+            char[][] BoardStatus = new char[3][3];
+
+            for (int a = 0; a < 3; a++) {
+              for (int b = 0; b < 3; b++) {
+                BoardStatus[a][b] = in.readChar();
+              }
+            }
+            GameBoard.SetBoardStatus(BoardStatus);
+
+            runOnUiThread(new Runnable() {
+              @Override
+              public void run() {
+                GameBoard.UpdateWholeBoard(GameButton);
+                GameBoard.SetButtonsEnabled(GameButton, true);
+
+                if (GameBoard.CheckIsPlayerWin(cOpponentSymbol)) {
+                  Toast.makeText(ThisContext, "Opponent win.", Toast.LENGTH_SHORT).show();
+                }
+                else if (GameBoard.GetAvailableStates().isEmpty()) {
+                  Toast.makeText(ThisContext, "Draw.", Toast.LENGTH_SHORT).show();
+                }
+                else {
+                  Toast.makeText(ThisContext, "It's your turn.", Toast.LENGTH_SHORT).show();
+                }
+              }
+            });
+          }
+        }
+        catch (IOException ex) {
+          ex.printStackTrace();
+        }
+      }
+    }
   }
 }
