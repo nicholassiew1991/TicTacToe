@@ -173,7 +173,9 @@ public class MultiPlayerActivity extends Activity {
   }
 
   private class NewReceiveMessages extends Thread {
+
     public void run() {
+
       while (true) {
         try {
           DataInputStream in = new DataInputStream(Connection.getInputStream());
@@ -207,6 +209,19 @@ public class MultiPlayerActivity extends Activity {
                 }
               }
             });
+          }
+          else if (MessagesType == Globals.CLIENT_DISCONNECT_WHILE_PLAYING) {
+
+            final String ShowMessage = in.readUTF();
+
+            runOnUiThread(new Runnable() {
+              @Override
+              public void run() {
+                GameBoard.SetButtonsEnabled(GameButton, false);
+                Toast.makeText(ThisContext, ShowMessage, Toast.LENGTH_SHORT).show();
+              }
+            });
+            Connection.close();
           }
         }
         catch (IOException ex) {

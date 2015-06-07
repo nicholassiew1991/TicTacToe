@@ -13,6 +13,7 @@ public class Globals {
   static final byte CLIENT_WAIT_PAIRING = 1;
   static final byte SET_PLAYER_SYMBOL = 2;
   static final byte BOARD_STATUS = 3;
+  static final byte CLIENT_DISCONNECT_WHILE_PLAYING = 4;
 
   /** Broadcast Type Constant Declaration **/
 
