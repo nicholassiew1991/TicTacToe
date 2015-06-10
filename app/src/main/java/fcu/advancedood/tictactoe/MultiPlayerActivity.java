@@ -1,8 +1,10 @@
 package fcu.advancedood.tictactoe;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -130,6 +132,38 @@ public class MultiPlayerActivity extends Activity {
   }
   //</editor-fold>
 
+  @Override
+  public void onBackPressed() {
+
+    if (GameBoard.IsGameOver()) {
+      finish();
+      return;
+    }
+
+    AlertDialog.Builder alertDialog = new AlertDialog.Builder(MultiPlayerActivity.this);
+    alertDialog.setTitle("Exit");
+    alertDialog.setMessage("Game is in the progress.\nAre you sure want to exit?");
+
+    alertDialog.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+      public void onClick(DialogInterface dialog, int which) {
+        try {
+          Connection.close();
+          finish();
+        }
+        catch (IOException e) {
+          e.printStackTrace();
+        }
+      }
+    });
+    alertDialog.setNegativeButton("No", new DialogInterface.OnClickListener() {
+      public void onClick(DialogInterface dialog, int which) {
+        dialog.dismiss();
+      }
+    });
+
+    alertDialog.show();
+  }
+
   private void OnGameButtonClicked(int x, int y) {
 
     Point MovePoint = new Point(x, y);
@@ -174,59 +208,91 @@ public class MultiPlayerActivity extends Activity {
 
   private class NewReceiveMessages extends Thread {
 
+    private DataInputStream in;
+
     public void run() {
 
       while (true) {
         try {
-          DataInputStream in = new DataInputStream(Connection.getInputStream());
+          in = new DataInputStream(Connection.getInputStream());
 
           byte MessagesType = in.readByte();
 
           if (MessagesType == Globals.BOARD_STATUS) {
-            char[][] BoardStatus = new char[3][3];
-
-            for (int a = 0; a < 3; a++) {
-              for (int b = 0; b < 3; b++) {
-                BoardStatus[a][b] = in.readChar();
-              }
-            }
-            GameBoard.SetBoardStatus(BoardStatus);
-
-            runOnUiThread(new Runnable() {
-              @Override
-              public void run() {
-                GameBoard.UpdateWholeBoard(GameButton);
-                GameBoard.SetButtonsEnabled(GameButton, true);
-
-                if (GameBoard.CheckIsPlayerWin(cOpponentSymbol)) {
-                  Toast.makeText(ThisContext, "Opponent win.", Toast.LENGTH_SHORT).show();
-                }
-                else if (GameBoard.GetAvailableStates().isEmpty()) {
-                  Toast.makeText(ThisContext, "Draw.", Toast.LENGTH_SHORT).show();
-                }
-                else {
-                  Toast.makeText(ThisContext, "It's your turn.", Toast.LENGTH_SHORT).show();
-                }
-              }
-            });
+            ReceiveBoardStatus();
           }
           else if (MessagesType == Globals.CLIENT_DISCONNECT_WHILE_PLAYING) {
 
-            final String ShowMessage = in.readUTF();
-
-            runOnUiThread(new Runnable() {
-              @Override
-              public void run() {
-                GameBoard.SetButtonsEnabled(GameButton, false);
-                Toast.makeText(ThisContext, ShowMessage, Toast.LENGTH_SHORT).show();
-              }
-            });
-            Connection.close();
+            if (GameBoard.IsGameOver() == false) {
+              ReceiveOpponentDisconnected();
+            }
           }
         }
         catch (IOException ex) {
           ex.printStackTrace();
         }
+      }
+    }
+
+    private void ReceiveBoardStatus() {
+      char[][] BoardStatus = new char[3][3];
+
+      try {
+        for (int a = 0; a < 3; a++) {
+          for (int b = 0; b < 3; b++) {
+            BoardStatus[a][b] = in.readChar();
+          }
+        }
+        GameBoard.SetBoardStatus(BoardStatus);
+
+        runOnUiThread(new Runnable() {
+          @Override
+          public void run() {
+            GameBoard.UpdateWholeBoard(GameButton);
+            GameBoard.SetButtonsEnabled(GameButton, true);
+
+            if (GameBoard.CheckIsPlayerWin(cOpponentSymbol)) {
+              Toast.makeText(ThisContext, "Opponent win.", Toast.LENGTH_SHORT).show();
+            }
+            else if (GameBoard.GetAvailableStates().isEmpty()) {
+              Toast.makeText(ThisContext, "Draw.", Toast.LENGTH_SHORT).show();
+            }
+            else {
+              Toast.makeText(ThisContext, "It's your turn.", Toast.LENGTH_SHORT).show();
+            }
+          }
+        });
+      }
+      catch (IOException ex) {
+        ex.printStackTrace();
+      }
+    }
+
+    private void ReceiveOpponentDisconnected() {
+      try {
+
+        final String ShowMessage = in.readUTF();
+
+        runOnUiThread(new Runnable() {
+          @Override
+          public void run() {
+
+            AlertDialog.Builder alertDialog = new AlertDialog.Builder(ThisContext);
+            alertDialog.setTitle("Game Over");
+            alertDialog.setMessage(ShowMessage);
+            alertDialog.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+              public void onClick(DialogInterface dialog, int id) {
+                finish();
+              }
+            });
+
+            alertDialog.show();
+          }
+        });
+        Connection.close();
+      }
+      catch (IOException ex) {
+        ex.printStackTrace();
       }
     }
   }
