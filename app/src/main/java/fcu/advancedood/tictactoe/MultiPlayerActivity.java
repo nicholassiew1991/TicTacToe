@@ -2,25 +2,19 @@ package fcu.advancedood.tictactoe;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
-import java.io.DataInput;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
 import java.net.Socket;
 
 public class MultiPlayerActivity extends Activity {
@@ -41,7 +35,8 @@ public class MultiPlayerActivity extends Activity {
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    setContentView(R.layout.activity_single_player);
+    //setContentView(R.layout.activity_single_player);
+    setContentView(R.layout.activity_game_board_layout);
     Init();
   }
 
@@ -94,6 +89,7 @@ public class MultiPlayerActivity extends Activity {
         (ImageButton) findViewById(R.id.imageButton9)
       }
     };
+
     ActionInit();
     if (cPlayerSymbol == 'O') {
       cOpponentSymbol = 'X';
@@ -107,16 +103,24 @@ public class MultiPlayerActivity extends Activity {
 
     this.SharedObj = (SharedConnection) getApplicationContext();
     this.Connection = SharedObj.GetSocketConnection();
-    //new ReceiveMessages().start();
-    new NewReceiveMessages().start();
+    new ReceiveData().start();
   }
 
   private void ActionInit() {
+
     for (int a = 0; a < 3; a++) {
       for (int b = 0; b < 3; b++) {
         GameButtonActionInit(a, b);
       }
     }
+
+    ImageButton SendChatMessageButton = (ImageButton) findViewById(R.id.sendMessage);
+    SendChatMessageButton.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View v) {
+        OnSendChatClicked();
+      }
+    });
   }
 
   private void GameButtonActionInit(int x, int y) {
@@ -175,7 +179,7 @@ public class MultiPlayerActivity extends Activity {
 
     GameBoard.SetPlayerMove(MovePoint, cPlayerSymbol);
     GameBoard.UpdateBoard(GameButton, MovePoint, cPlayerSymbol);
-    NewSendGameStatus();
+    SendGameStatus();
     GameBoard.SetButtonsEnabled(GameButton, false);
 
     if (GameBoard.CheckIsPlayerWin(cPlayerSymbol)) {
@@ -189,7 +193,11 @@ public class MultiPlayerActivity extends Activity {
     }
   }
 
-  private void NewSendGameStatus() {
+  private void OnSendChatClicked() {
+
+  }
+
+  private void SendGameStatus() {
     try {
       char[][] BoardStatus = GameBoard.GetBoardStatus();
       DataOutputStream dOut = new DataOutputStream(Connection.getOutputStream());
@@ -206,7 +214,7 @@ public class MultiPlayerActivity extends Activity {
     }
   }
 
-  private class NewReceiveMessages extends Thread {
+  private class ReceiveData extends Thread {
 
     private DataInputStream in;
 
@@ -222,10 +230,12 @@ public class MultiPlayerActivity extends Activity {
             ReceiveBoardStatus();
           }
           else if (MessagesType == Globals.CLIENT_DISCONNECT_WHILE_PLAYING) {
-
             if (GameBoard.IsGameOver() == false) {
               ReceiveOpponentDisconnected();
             }
+          }
+          else if (MessagesType == Globals.CHAT_MESSAGE) {
+            ReceiveChatMessage();
           }
         }
         catch (IOException ex) {
@@ -294,6 +304,10 @@ public class MultiPlayerActivity extends Activity {
       catch (IOException ex) {
         ex.printStackTrace();
       }
+    }
+
+    private void ReceiveChatMessage() {
+
     }
   }
 }

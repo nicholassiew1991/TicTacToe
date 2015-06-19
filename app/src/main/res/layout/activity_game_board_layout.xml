@@ -13,7 +13,7 @@
         <LinearLayout
             android:orientation="horizontal"
             android:layout_width="fill_parent"
-            android:layout_height="102dp"
+            android:layout_height="85dp"
             android:layout_alignParentTop="true"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
@@ -51,8 +51,8 @@
 
         <LinearLayout
             android:orientation="vertical"
-            android:layout_width="333dp"
-            android:layout_height="334dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_marginTop="30dp">
 
             <GridLayout
@@ -164,29 +164,40 @@
             </GridLayout>
         </LinearLayout>
 
-        <TextView
-            android:layout_width="303dp"
-            android:layout_height="wrap_content"
-            android:text="New Text"
-            android:id="@+id/textView"
-            android:layout_alignParentBottom="true"
-            android:layout_alignLeft="@+id/linearLayout2"
-            android:layout_alignStart="@+id/linearLayout2"
-            android:layout_alignRight="@+id/linearLayout2"
-            android:layout_alignEnd="@+id/linearLayout2"
-            android:background="@android:color/white"
-            android:layout_marginLeft="10dp"
-            android:layout_weight="0.44"
-            style="@android:style/Widget.WebView" />
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="bottom"
+            android:gravity="bottom"
+            android:paddingTop="50dp">
 
-        <Button
-            style="?android:attr/buttonStyleSmall"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Send"
-            android:id="@+id/button"
-            android:layout_gravity="right"
-            android:layout_marginRight="10dp" />
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:weightSum="1">
+
+                <EditText
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/ChatMessage"
+                    android:layout_weight="0.95"
+                    android:text="Try to change black button on text change"
+                    android:typeface="sans"
+                    android:textSize="15dp"/>
+
+                <ImageButton
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="@null"
+                    android:id="@+id/sendMessage"
+                    android:scaleType="fitXY"
+                    android:src="@drawable/ic_send_grey600_48dp"/>
+            </LinearLayout>
+        </RelativeLayout>
 
     </LinearLayout>
 

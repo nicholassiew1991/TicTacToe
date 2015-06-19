@@ -7,6 +7,7 @@ public class Globals {
 
   /** Server Data Constant Declaration **/
   static final String SERVER_ADDRESS = "192.168.191.1";
+  //static final String SERVER_ADDRESS = "10.0.2.2"; // For emulator use.
   static final String SERVER_PORT = "6666";
 
   /** Message Type Constant Declaration **/
@@ -14,6 +15,7 @@ public class Globals {
   static final byte SET_PLAYER_SYMBOL = 2;
   static final byte BOARD_STATUS = 3;
   static final byte CLIENT_DISCONNECT_WHILE_PLAYING = 4;
+  static final byte CHAT_MESSAGE = 5;
 
   /** Broadcast Type Constant Declaration **/
 
