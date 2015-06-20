@@ -113,10 +113,15 @@ public class StartMenuActivity extends Activity {
       @Override
       protected void onPostExecute(Void result) {
         ConnectServerLoadingDialog.dismiss();
-        Intent MultiPlayerActivity = new Intent();
-        MultiPlayerActivity.putExtra("Symbol", cPlayerSymbol);
-        MultiPlayerActivity.setClass(StartMenuActivity.this, MultiPlayerActivity.class);
-        startActivity(MultiPlayerActivity);
+        if (cPlayerSymbol != 0) {
+          Intent MultiPlayerActivity = new Intent();
+          MultiPlayerActivity.putExtra("Symbol", cPlayerSymbol);
+          MultiPlayerActivity.setClass(StartMenuActivity.this, MultiPlayerActivity.class);
+          startActivity(MultiPlayerActivity);
+        }
+        else {
+          Toast.makeText(ThisContext, "Can't connect to server.", Toast.LENGTH_SHORT).show();
+        }
       }
 
     }.execute(Globals.SERVER_ADDRESS, Globals.SERVER_PORT);
