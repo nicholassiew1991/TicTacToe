@@ -232,7 +232,7 @@ public class MultiPlayerActivity extends Activity {
   private void OnSendChatClicked() {
 
     EditText messageText = (EditText) findViewById(R.id.txtInputChatMessage);
-    String strChatMessage = messageText.getText().toString();
+    String strChatMessage = messageText.getText().toString().trim();
 
     if (strChatMessage.equals("")) {
       return;
