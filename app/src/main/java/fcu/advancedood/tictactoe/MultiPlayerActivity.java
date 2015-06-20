@@ -5,10 +5,12 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
@@ -195,6 +197,33 @@ public class MultiPlayerActivity extends Activity {
 
   private void OnSendChatClicked() {
 
+    EditText messageText = (EditText) findViewById(R.id.ChatMessage);
+    String strChatMessage = messageText.getText().toString();
+
+    try {
+
+      DataOutputStream dOut = new DataOutputStream(Connection.getOutputStream());
+
+      Toast ShowSentMessage = Toast.makeText(ThisContext, strChatMessage, Toast.LENGTH_SHORT);
+      dOut.writeByte(Globals.CHAT_MESSAGE);
+      //dOut.write(strChatMessage.getBytes());
+      dOut.writeUTF(strChatMessage);
+
+
+      if (cPlayerSymbol == 'O') {
+        ShowSentMessage.setGravity(Gravity.TOP | Gravity.LEFT, 0, 0);
+      }
+      else {
+        ShowSentMessage.setGravity(Gravity.TOP | Gravity.RIGHT, 0, 0);
+      }
+
+      ShowSentMessage.show();
+      dOut.flush();
+    }
+    catch (IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
   }
 
   private void SendGameStatus() {
@@ -286,7 +315,6 @@ public class MultiPlayerActivity extends Activity {
         runOnUiThread(new Runnable() {
           @Override
           public void run() {
-
             AlertDialog.Builder alertDialog = new AlertDialog.Builder(ThisContext);
             alertDialog.setTitle("Game Over");
             alertDialog.setMessage(ShowMessage);
@@ -308,6 +336,28 @@ public class MultiPlayerActivity extends Activity {
 
     private void ReceiveChatMessage() {
 
+      try {
+
+        final String strReceivedMessage = in.readUTF();
+        final Toast ShowReceiveMessage = Toast.makeText(ThisContext, strReceivedMessage, Toast.LENGTH_SHORT);
+
+        if (cOpponentSymbol == 'O') {
+          ShowReceiveMessage.setGravity(Gravity.TOP | Gravity.LEFT, 0, 0);
+        }
+        else if (cOpponentSymbol == 'X') {
+          ShowReceiveMessage.setGravity(Gravity.TOP | Gravity.RIGHT, 0, 0);
+        }
+
+        runOnUiThread(new Runnable() {
+          @Override
+          public void run() {
+            ShowReceiveMessage.show();
+          }
+        });
+      }
+      catch (IOException ex) {
+        ex.printStackTrace();
+      }
     }
   }
 }
