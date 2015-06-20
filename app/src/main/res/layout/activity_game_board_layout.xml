@@ -183,7 +183,7 @@
                 <EditText
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:id="@+id/ChatMessage"
+                    android:id="@+id/txtInputChatMessage"
                     android:layout_weight="0.95"
                     android:typeface="sans"
                     android:textSize="15dp"/>

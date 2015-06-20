@@ -4,7 +4,10 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
@@ -77,21 +80,21 @@ public class MultiPlayerActivity extends Activity {
     /** Game initializing. **/
     this.GameBoard = new Board();
     GameButton = new ImageButton[][]{
-            {
-                    (ImageButton) findViewById(R.id.imageButton1),
-                    (ImageButton) findViewById(R.id.imageButton2),
-                    (ImageButton) findViewById(R.id.imageButton3)
-            },
-            {
-                    (ImageButton) findViewById(R.id.imageButton4),
-                    (ImageButton) findViewById(R.id.imageButton5),
-                    (ImageButton) findViewById(R.id.imageButton6)
-            },
-            {
-                    (ImageButton) findViewById(R.id.imageButton7),
-                    (ImageButton) findViewById(R.id.imageButton8),
-                    (ImageButton) findViewById(R.id.imageButton9)
-            }
+      {
+        (ImageButton) findViewById(R.id.imageButton1),
+        (ImageButton) findViewById(R.id.imageButton2),
+        (ImageButton) findViewById(R.id.imageButton3)
+      },
+      {
+        (ImageButton) findViewById(R.id.imageButton4),
+        (ImageButton) findViewById(R.id.imageButton5),
+        (ImageButton) findViewById(R.id.imageButton6)
+      },
+      {
+        (ImageButton) findViewById(R.id.imageButton7),
+        (ImageButton) findViewById(R.id.imageButton8),
+        (ImageButton) findViewById(R.id.imageButton9)
+      }
     };
 
     ActionInit();
@@ -123,6 +126,35 @@ public class MultiPlayerActivity extends Activity {
       @Override
       public void onClick(View v) {
         OnSendChatClicked();
+      }
+    });
+
+    EditText txtChatInput = (EditText) findViewById(R.id.txtInputChatMessage);
+    txtChatInput.addTextChangedListener(new TextWatcher() {
+      @Override
+      public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+      }
+
+      @Override
+      public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+        EditText txtChatTextInput = (EditText) findViewById(R.id.txtInputChatMessage);
+        ImageButton cmdSendMessage = (ImageButton) findViewById(R.id.sendMessage);
+
+        String strInputString = txtChatTextInput.getText().toString().trim();
+
+        if (strInputString.length() == 0) {
+          cmdSendMessage.setImageResource(R.drawable.ic_send_grey600_48dp);
+        }
+        else {
+          cmdSendMessage.setImageResource(R.drawable.ic_send_black_48dp);
+        }
+      }
+
+      @Override
+      public void afterTextChanged(Editable s) {
+
       }
     });
   }
@@ -199,7 +231,7 @@ public class MultiPlayerActivity extends Activity {
 
   private void OnSendChatClicked() {
 
-    EditText messageText = (EditText) findViewById(R.id.ChatMessage);
+    EditText messageText = (EditText) findViewById(R.id.txtInputChatMessage);
     String strChatMessage = messageText.getText().toString();
 
     if (strChatMessage.equals("")) {
