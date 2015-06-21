@@ -256,6 +256,8 @@ public class MultiPlayerActivity extends Activity {
 
       ShowSentMessage.show();
       dOut.flush();
+
+      messageText.setText("");
     }
     catch (IOException e) {
       Toast.makeText(ThisContext, "Unknown error. Can't send message.", Toast.LENGTH_SHORT).show();
